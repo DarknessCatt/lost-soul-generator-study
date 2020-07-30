@@ -1,82 +1,82 @@
 extends Node2D
 
-enum {DOWN, UP, RIGHT, LEFT}
-
 const ROOM_RES = preload("res://Rooms/Rooms.tscn")
 const ROOM_SIZE = 8
-const MAP_SIZE = 4
-const MAP_NUM = 6
+const MAP_SIZE = 6
+const MAP_NUM = 10
 
 
-var directions = [DOWN, UP, RIGHT, LEFT]
+var directions = ["down", "up", "left", "right"]
 var map : Array = []
 
 func _ready():
 	randomize()
 	var rooms : Node2D = ROOM_RES.instance()
+	rooms._ready()
 
 	for x in range(MAP_SIZE):
 		map.append([])
-		for y in range(MAP_SIZE):
+		for _y in range(MAP_SIZE):
 			map[x].append(null)
 
 	var room_list = []
 	var room_pos = Vector2.ZERO
-	var from = UP
+	var from = "up"
 
-	for num in range(MAP_NUM):
+	for _num in range(MAP_NUM):
 		var dir = get_random_dir(room_pos)
 
-		if dir == -1:
+		if dir == "":
+			print("generation aborted")
 			break
 
-		map[room_pos.x][room_pos.y] = {from = from, dir = dir}
-		room_list.append({from = from, dir = dir, pos = room_pos})
+		map[room_pos.x][room_pos.y] = [from, dir]
+		room_list.append({"pos" : room_pos, "entrances" : [from, dir]})
 
 		match dir:
-			UP:
-				from = DOWN
+			"up":
+				from = "down"
 				room_pos.y -= 1
 
-			DOWN:
-				from = UP
+			"down":
+				from = "up"
 				room_pos.y += 1
 
-			RIGHT:
-				from = LEFT
+			"right":
+				from = "left"
 				room_pos.x += 1
 
-			LEFT:
-				from = RIGHT
+			"left":
+				from = "right"
 				room_pos.x -= 1
 
 	for room_info in room_list:
-		copy_room(room_info.pos*ROOM_SIZE, rooms.get_room(room_info.from, room_info.dir))
+		copy_room(room_info.pos*ROOM_SIZE, rooms.get_room(room_info.entrances))
 
 	#copy_room(room_pos*ROOM_SIZE, rooms.get_room(0))
 
-func get_random_dir(pos : Vector2) -> int:
+func get_random_dir(pos : Vector2) -> String:
 	directions.shuffle()
 
 	for dir in directions:
-		match directions[dir]:
-			UP:
+		match dir:
+			"up":
 				if (pos.y - 1) >= 0 and map[pos.x][pos.y - 1] == null:
-					return UP
+					return "up"
 
-			DOWN:
+			"down":
 				if (pos.y + 1) < MAP_SIZE and map[pos.x][pos.y + 1] == null:
-					return DOWN
+					return "down"
 
-			RIGHT:
+			"right":
 				if (pos.x + 1) < MAP_SIZE and map[pos.x + 1][pos.y] == null:
-					return RIGHT
+					return "right"
 
-			LEFT:
+			"left":
 				if (pos.x - 1) >= 0 and map[pos.x - 1][pos.y] == null:
-					return LEFT
+					return "left"
 
-	return -1
+	return ""
 
 
 func copy_room(pos : Vector2, room : Array) -> void:
