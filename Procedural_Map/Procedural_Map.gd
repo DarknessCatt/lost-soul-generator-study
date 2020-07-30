@@ -2,8 +2,8 @@ extends Node2D
 
 const ROOM_RES = preload("res://Rooms/Rooms.tscn")
 const ROOM_SIZE = 8
-const MAP_SIZE = 6
-const MAP_NUM = 10
+const MAP_SIZE = 10
+const MAP_NUM = 50
 
 
 var directions = ["down", "up", "left", "right"]
@@ -22,33 +22,53 @@ func _ready():
 	var room_list = []
 	var room_pos = Vector2.ZERO
 	var from = "up"
+	var backtrack : int = -1
+	var errors : int = 0
 
-	for _num in range(MAP_NUM):
+	var num : int = 0
+	while num < MAP_NUM:
 		var dir = get_random_dir(room_pos)
 
 		if dir == "":
-			print("generation aborted")
-			break
+			errors += 1
+			if errors > 40:
+				print("stuck too much, aborting")
+				break
 
-		map[room_pos.x][room_pos.y] = [from, dir]
-		room_list.append({"pos" : room_pos, "entrances" : [from, dir]})
+			print("stuck, backtracking")
+			backtrack = randi()%room_list.size()
+			room_pos = room_list[backtrack].pos
+			continue
 
-		match dir:
-			"up":
-				from = "down"
-				room_pos.y -= 1
+		else:
+			map[room_pos.x][room_pos.y] = [from, dir]
 
-			"down":
-				from = "up"
-				room_pos.y += 1
+			if backtrack == -1:
+				room_list.append({"pos" : room_pos, "entrances" : [from, dir]})
+				num += 1
 
-			"right":
-				from = "left"
-				room_pos.x += 1
+			else:
+				room_list[backtrack].entrances.append(dir)
+				backtrack = -1
 
-			"left":
-				from = "right"
-				room_pos.x -= 1
+			match dir:
+				"up":
+					from = "down"
+					room_pos.y -= 1
+
+				"down":
+					from = "up"
+					room_pos.y += 1
+
+				"right":
+					from = "left"
+					room_pos.x += 1
+
+				"left":
+					from = "right"
+					room_pos.x -= 1
+
+	print(room_list.size())
 
 	for room_info in room_list:
 		copy_room(room_info.pos*ROOM_SIZE, rooms.get_room(room_info.entrances))
