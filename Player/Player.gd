@@ -17,4 +17,4 @@ func _physics_process(delta):
 		dir.x = 1
 
 	# warning-ignore:return_value_discarded
-	self.move_and_slide(dir*20000*delta)
+	self.move_and_slide(dir*40000*delta)
