@@ -4,7 +4,7 @@ const ROOM_RES = preload("res://Rooms/Rooms.tscn")
 const ROOM_SIZE = 8
 const MAP_SIZE = 10
 
-const PATH_NUM = 10
+const PATH_NUM = 6
 const PATH_MIN = 3
 
 const BRANCH_NUM = 4
