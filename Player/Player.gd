@@ -16,4 +16,5 @@ func _physics_process(delta):
 	elif Input.is_action_pressed("ui_right"):
 		dir.x = 1
 
+	# warning-ignore:return_value_discarded
 	self.move_and_slide(dir*20000*delta)
