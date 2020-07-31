@@ -80,15 +80,20 @@ func get_room(entrances : Array) -> Array:
 	var data := []
 
 	var tree = room_tree
+	var room
 
-	for dir in ["down", "up", "left", "right"]:
-		if entrances.has(dir):
-			tree = tree["has"]
-		else:
-			tree = tree["hasnt"]
+	if entrances.has("start"):
+		room = $START
 
-	tree.shuffle()
-	var room = tree.front()
+	else:
+		for dir in ["down", "up", "left", "right"]:
+			if entrances.has(dir):
+				tree = tree["has"]
+			else:
+				tree = tree["hasnt"]
+
+		tree.shuffle()
+		room = tree.front()
 
 	for v in room.get_used_cells():
 		data.append([v, room.get_cellv(v)])

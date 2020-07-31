@@ -1,16 +1,16 @@
 extends Node2D
 
 const ROOM_RES = preload("res://Rooms/Rooms.tscn")
-const ROOM_SIZE = 8
-const MAP_SIZE = 10
+const ROOM_SIZE = 7
+const MAP_SIZE = 12
 
 const PATH_NUM = 6
 const PATH_MIN = 3
 
 const BRANCH_NUM = 4
-const BRANCH_SIZE = 4
+const BRANCH_SIZE = 6
 
-var directions = ["down", "up", "left", "right"]
+var directions = ["down", "down", "up", "left", "left", "right", "right"]
 var map : Array = []
 
 func _ready():
@@ -27,7 +27,7 @@ func _ready():
 	var full_map : Array = []
 
 	while error_count < 10:
-		var room_list : Array = make_path(Vector2.ZERO, "up", PATH_NUM)
+		var room_list : Array = make_path(Vector2(5,1), "start", PATH_NUM)
 
 		if room_list.size() >= PATH_MIN:
 			error_count = 0
@@ -65,6 +65,21 @@ func _ready():
 		var rand_start = randi()%(rand_path.size()-1)
 
 		var room_list : Array = make_path(rand_path[rand_start].pos, "up", BRANCH_SIZE)
+
+		if room_list.size() > 2:
+			error_count = 0
+			var branch_map : Dictionary = room_list.pop_front()
+			rand_path[rand_start].entrances.append(branch_map.entrances[1])
+			branch_list.append(room_list)
+
+	for path in branch_list:
+		full_map.append(path)
+
+	for _num in range(BRANCH_NUM):
+		var rand_path = full_map[randi()%(full_map.size())]
+		var rand_start = randi()%(rand_path.size()-1)
+
+		var room_list : Array = make_path(rand_path[rand_start].pos, "up", BRANCH_SIZE/2)
 
 		if room_list.size() > 2:
 			error_count = 0
