@@ -34,7 +34,10 @@ func _ready():
 			full_map.append(room_list)
 			break
 
-		error_count += 1
+		else:
+			for room in room_list:
+				map[room.pos.x][room.pos.y] = null
+			error_count += 1
 
 	if error_count == 10:
 		print("aborting")
@@ -51,6 +54,12 @@ func _ready():
 			full_map[0][rand_start].entrances.append(branch_map.entrances[1])
 			full_map.append(room_list)
 			break
+
+		else:
+			room_list.pop_front()
+			for room in room_list:
+				map[room.pos.x][room.pos.y] = null
+			error_count += 1
 
 		error_count += 1
 
@@ -72,6 +81,11 @@ func _ready():
 			rand_path[rand_start].entrances.append(branch_map.entrances[1])
 			branch_list.append(room_list)
 
+		else:
+			room_list.pop_front()
+			for room in room_list:
+				map[room.pos.x][room.pos.y] = null
+
 	for path in branch_list:
 		full_map.append(path)
 
@@ -86,6 +100,11 @@ func _ready():
 			var branch_map : Dictionary = room_list.pop_front()
 			rand_path[rand_start].entrances.append(branch_map.entrances[1])
 			branch_list.append(room_list)
+
+		else:
+			room_list.pop_front()
+			for room in room_list:
+				map[room.pos.x][room.pos.y] = null
 
 	for room_info in full_map[0]:
 		copy_room($Map_Part1, room_info.pos*ROOM_SIZE, rooms.get_room(room_info.entrances))
