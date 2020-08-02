@@ -4,11 +4,10 @@ const ROOM_SIZE : int = 8
 
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
 
-const MAP_SIZE : Vector2 = Vector2(20, 20)
-const START_POS : Vector2 = Vector2(5, 5)
+const MAP_SIZE : Vector2 = Vector2(60, 60)
+const START_POS : Vector2 = Vector2(30, 30)
 
 var map_data : Array
-var move_directions : Array = [exit_dir.UP, exit_dir.DOWN, exit_dir.LEFT, exit_dir.RIGHT]
 
 func _ready():
 	randomize()
@@ -24,7 +23,8 @@ func _ready():
 	var created_rooms : int = 0
 	var errors : int = 0
 
-	while created_rooms < 5 and errors < 5:
+	while created_rooms < 10 and errors < 10:
+		#print("Making room in "+str(room_pos))
 		var new_room : Dictionary = $Room_Manager.get_room()
 
 		var fits : bool = false
@@ -54,15 +54,18 @@ func _ready():
 			continue
 
 		created_rooms += 1
+		#print("\tmarking rooms in map_data")
 		for pos in new_room.positions:
 			var map_pos : Vector2 = room_placement_pos + pos
 			map_data[map_pos.x][map_pos.y] = new_room
+			#print("\t\t"+str(map_pos))
 
 		for tile in new_room.tiles:
 			var tile_pos : Vector2 = tile[0] + room_placement_pos*ROOM_SIZE
 			$Tile_Map.set_cell(tile_pos.x, tile_pos.y, tile[1])
 
 		for exit in new_room.exits:
+			#print("\tgetting exit from "+str(room_placement_pos+exit[0])+" in direction "+str(exit[1]))
 			if dir_is_valid(room_placement_pos+exit[0], exit[1]):
 				match(exit[1]):
 
@@ -92,15 +95,15 @@ func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 				return false
 
 		exit_dir.DOWN:
-			if (room_pos.y + 1) > MAP_SIZE.y or map_data[room_pos.x][room_pos.y+1] != null:
+			if (room_pos.y + 1) >= MAP_SIZE.y or map_data[room_pos.x][room_pos.y+1] != null:
 				return false
 
-		exit_dir.RIGHT:
+		exit_dir.LEFT:
 			if (room_pos.x - 1) < 0 or map_data[room_pos.x-1][room_pos.y] != null:
 				return false
 
 		exit_dir.RIGHT:
-			if (room_pos.x + 1) > MAP_SIZE.y or map_data[room_pos.x+1][room_pos.y] != null:
+			if (room_pos.x + 1) >= MAP_SIZE.y or map_data[room_pos.x+1][room_pos.y] != null:
 				return false
 
 	return true

@@ -17,4 +17,6 @@ func _physics_process(delta):
 		dir.x = 1
 
 	# warning-ignore:return_value_discarded
-	self.move_and_slide(dir*40000*delta)
+	self.move_and_slide(dir*80000*delta)
+
+	$Label.set_text("[ "+str(int(self.position.x)/(8*32))+", "+str(int(self.position.y)/(8*32))+"]")

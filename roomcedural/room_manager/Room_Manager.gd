@@ -31,15 +31,18 @@ func _ready():
 			room.room_types.POWER:
 				power_rooms.list.append(room)
 
-	#normal_rooms.list.shuffle()
+	normal_rooms.list.shuffle()
 	#start_rooms.list.shuffle()
 	#power_rooms.list.shuffle()
 
 func get_room() -> Dictionary:
-	if rand_range(0, 1) > 0.5:
-		return normal_rooms.list[0].get_data()
-	else:
-		return normal_rooms.list[1].get_data()
+	var data = normal_rooms.list[normal_rooms.pointer].get_data()
+	normal_rooms.pointer += 1
+
+	if normal_rooms.pointer >= normal_rooms.list.size():
+		normal_rooms.pointer = 0
+
+	return data
 
 func free():
 	for room in room_list:

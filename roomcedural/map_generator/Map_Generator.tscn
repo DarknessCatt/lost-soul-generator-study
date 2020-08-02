@@ -13,6 +13,7 @@ script = ExtResource( 2 )
 [node name="Tile_Map" parent="." instance=ExtResource( 3 )]
 
 [node name="Player" parent="." instance=ExtResource( 4 )]
+position = Vector2( 7680, 7680 )
 
 [node name="Abort" type="Timer" parent="."]
 process_mode = 0
