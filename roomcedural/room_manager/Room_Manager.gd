@@ -35,12 +35,16 @@ func _ready():
 	#start_rooms.list.shuffle()
 	#power_rooms.list.shuffle()
 
-func get_room() -> Dictionary:
+func prepare_room_list() -> void:
+	normal_rooms.list.shuffle()
+	normal_rooms.pointer = 0
+
+func get_room():
+	if normal_rooms.pointer >= normal_rooms.list.size():
+		return null
+
 	var data = normal_rooms.list[normal_rooms.pointer].get_data()
 	normal_rooms.pointer += 1
-
-	if normal_rooms.pointer >= normal_rooms.list.size():
-		normal_rooms.pointer = 0
 
 	return data
 

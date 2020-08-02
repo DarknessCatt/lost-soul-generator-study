@@ -4,8 +4,8 @@ const ROOM_SIZE : int = 8
 
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
 
-const MAP_SIZE : Vector2 = Vector2(60, 60)
-const START_POS : Vector2 = Vector2(30, 30)
+const MAP_SIZE : Vector2 = Vector2(40, 40)
+const START_POS : Vector2 = Vector2(20, 20)
 
 var map_data : Array
 
@@ -21,11 +21,16 @@ func _ready():
 	var room_pos = START_POS
 
 	var created_rooms : int = 0
-	var errors : int = 0
 
-	while created_rooms < 10 and errors < 10:
+	$Room_Manager.prepare_room_list()
+
+	while created_rooms < 30:
 		#print("Making room in "+str(room_pos))
-		var new_room : Dictionary = $Room_Manager.get_room()
+		var new_room = $Room_Manager.get_room()
+
+		if new_room == null:
+			print("Room List Empty!")
+			break
 
 		var fits : bool = false
 		var room_placement_pos : Vector2
@@ -50,7 +55,6 @@ func _ready():
 					break
 
 		if not fits:
-			errors += 1
 			continue
 
 		created_rooms += 1
@@ -86,6 +90,8 @@ func _ready():
 						room_pos = room_placement_pos + exit[0] + Vector2.RIGHT
 
 				break
+
+		$Room_Manager.prepare_room_list()
 
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	match(direction):
