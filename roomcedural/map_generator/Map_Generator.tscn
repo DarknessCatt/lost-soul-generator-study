@@ -13,3 +13,9 @@ script = ExtResource( 2 )
 [node name="Tile_Map" parent="." instance=ExtResource( 3 )]
 
 [node name="Player" parent="." instance=ExtResource( 4 )]
+
+[node name="Abort" type="Timer" parent="."]
+process_mode = 0
+wait_time = 5.0
+one_shot = true
+autostart = true

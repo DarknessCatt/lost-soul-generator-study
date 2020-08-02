@@ -36,7 +36,10 @@ func _ready():
 	#power_rooms.list.shuffle()
 
 func get_room() -> Dictionary:
-	return normal_rooms.list[0].get_data()
+	if rand_range(0, 1) > 0.5:
+		return normal_rooms.list[0].get_data()
+	else:
+		return normal_rooms.list[1].get_data()
 
 func free():
 	for room in room_list:

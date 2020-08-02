@@ -1,6 +1,6 @@
 extends Node2D
 
-enum exir_dir {UP, DOWN, LEFT, RIGHT}
+enum exit_dir {UP, DOWN, LEFT, RIGHT}
 enum room_types {START, NORMAL, POWER, BONUS}
 
 export(room_types) var room_type : int = room_types.NORMAL

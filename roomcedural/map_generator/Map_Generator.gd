@@ -2,15 +2,13 @@ extends Node2D
 
 const ROOM_SIZE : int = 8
 
-enum exir_dir {UP, DOWN, LEFT, RIGHT}
-const dir_to_vec : Dictionary = {	exir_dir.UP : Vector2.UP, exir_dir.DOWN : Vector2.DOWN,
-									exir_dir.LEFT : Vector2.LEFT, exir_dir.RIGHT : Vector2.RIGHT }
+enum exit_dir {UP, DOWN, LEFT, RIGHT}
 
-const MAP_SIZE : Vector2 = Vector2(10, 10)
+const MAP_SIZE : Vector2 = Vector2(20, 20)
 const START_POS : Vector2 = Vector2(5, 5)
 
 var map_data : Array
-var move_directions : Array = [exir_dir.UP, exir_dir.DOWN, exir_dir.LEFT, exir_dir.RIGHT]
+var move_directions : Array = [exit_dir.UP, exit_dir.DOWN, exit_dir.LEFT, exit_dir.RIGHT]
 
 func _ready():
 	randomize()
@@ -20,57 +18,88 @@ func _ready():
 		for _y in range(MAP_SIZE.y):
 			map_data[x].append(null)
 
-	var from_direction = exir_dir.UP
+	var from_direction = exit_dir.UP
 	var room_pos = START_POS
 
 	var created_rooms : int = 0
+	var errors : int = 0
 
-	while created_rooms < 3:
+	while created_rooms < 5 and errors < 5:
 		var new_room : Dictionary = $Room_Manager.get_room()
 
-		#Check if the new_room fits
-		var fits : bool = true
+		var fits : bool = false
+		var room_placement_pos : Vector2
 
-		for pos in new_room.positions:
-			var map_pos : Vector2 = room_pos + pos
-			if map_data[map_pos.x][map_pos.y] != null:
-				fits = false
-				break
+		new_room.exits.shuffle()
+		#Check/get new room's entrance
+		for entrance in new_room.exits:
+			if entrance[1] == from_direction:
 
-		if fits:
-			created_rooms += 1
-			for pos in new_room.positions:
-				var map_pos : Vector2 = room_pos + pos
-				map_data[map_pos.x][map_pos.y] = new_room
+				room_placement_pos = room_pos - entrance[0]
+				fits = true
 
-			for tile in new_room.tiles:
-				var tile_pos : Vector2 = tile[0] + room_pos*ROOM_SIZE
-				$Tile_Map.set_cell(tile_pos.x, tile_pos.y, tile[1])
+				for pos in new_room.positions:
+					var map_pos : Vector2 = room_placement_pos + pos
+					if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
+					   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
+					   map_data[map_pos.x][map_pos.y] != null:
+						fits = false
+						break
 
-			new_room.exits.shuffle()
-
-			for exit in new_room.exits:
-				if dir_is_valid(room_pos+exit[0], exit[1]):
-					from_direction = exit[1]
-					room_pos = room_pos + exit[0] + dir_to_vec[exit[1]]
+				if fits:
 					break
+
+		if not fits:
+			errors += 1
+			continue
+
+		created_rooms += 1
+		for pos in new_room.positions:
+			var map_pos : Vector2 = room_placement_pos + pos
+			map_data[map_pos.x][map_pos.y] = new_room
+
+		for tile in new_room.tiles:
+			var tile_pos : Vector2 = tile[0] + room_placement_pos*ROOM_SIZE
+			$Tile_Map.set_cell(tile_pos.x, tile_pos.y, tile[1])
+
+		for exit in new_room.exits:
+			if dir_is_valid(room_placement_pos+exit[0], exit[1]):
+				match(exit[1]):
+
+					exit_dir.UP:
+						from_direction = exit_dir.DOWN
+						room_pos = room_placement_pos + exit[0] + Vector2.UP
+
+					exit_dir.DOWN:
+						from_direction = exit_dir.UP
+						room_pos = room_placement_pos + exit[0] + Vector2.DOWN
+
+					exit_dir.LEFT:
+						from_direction = exit_dir.RIGHT
+						room_pos = room_placement_pos + exit[0] + Vector2.LEFT
+
+					exit_dir.RIGHT:
+						from_direction = exit_dir.LEFT
+						room_pos = room_placement_pos + exit[0] + Vector2.RIGHT
+
+				break
 
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	match(direction):
 
-		exir_dir.UP:
+		exit_dir.UP:
 			if (room_pos.y - 1) < 0 or map_data[room_pos.x][room_pos.y-1] != null:
 				return false
 
-		exir_dir.DOWN:
+		exit_dir.DOWN:
 			if (room_pos.y + 1) > MAP_SIZE.y or map_data[room_pos.x][room_pos.y+1] != null:
 				return false
 
-		exir_dir.RIGHT:
+		exit_dir.RIGHT:
 			if (room_pos.x - 1) < 0 or map_data[room_pos.x-1][room_pos.y] != null:
 				return false
 
-		exir_dir.RIGHT:
+		exit_dir.RIGHT:
 			if (room_pos.x + 1) > MAP_SIZE.y or map_data[room_pos.x+1][room_pos.y] != null:
 				return false
 
