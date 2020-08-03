@@ -31,9 +31,9 @@ func _ready():
 	start_room["map_position"] = room_pos
 	place_room(start_room, room_pos, $Tile_Map1)
 
-	room_list += make_path(exit_data[1], exit_data[0], 8, $Tile_Map1)
+	room_list += make_path(exit_data[1], exit_data[0], 6, $Tile_Map1)
 
-	for _x in range(rand_range(1, 4)):
+	for _x in range(rand_range(1, 3)):
 		room_list.pop_front()
 
 	while true:
@@ -49,7 +49,7 @@ func _ready():
 			break
 
 	if not exit_data.empty():
-		room_list += make_path(exit_data[1], exit_data[0], 6, $Tile_Map2)
+		room_list += make_path(exit_data[1], exit_data[0], 4, $Tile_Map2)
 
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	match(direction):
@@ -172,5 +172,12 @@ func make_path(start_pos : Vector2, start_dir : int, path_limit : int = 4, Tile_
 		room_pos = exit_data[1]
 
 		$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
+
+	#Adding Power Room
+	$Room_Manager.prepare_room_list(room_types.POWER)
+	var power_room = $Room_Manager.get_room()
+	exit_data = choose_exit(power_room, room_pos)
+	power_room["map_position"] = room_pos
+	place_room(power_room, room_pos, Tile_Map)
 
 	return rooms_list

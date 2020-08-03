@@ -49,7 +49,7 @@ func _ready():
 	room_queue.list = normal_rooms[exit_dir.UP]
 	room_queue.list.shuffle()
 	start_rooms.list.shuffle()
-	#power_rooms.list.shuffle()
+	power_rooms.list.shuffle()
 
 func prepare_room_list(type: int, dir : int = exit_dir.UP) -> void:
 	match(type):
@@ -59,6 +59,9 @@ func prepare_room_list(type: int, dir : int = exit_dir.UP) -> void:
 
 		room_types.NORMAL:
 			room_queue.list = normal_rooms[dir]
+
+		room_types.POWER:
+			room_queue.list = power_rooms.list
 
 	room_queue.list.shuffle()
 	room_queue.pointer = 0
