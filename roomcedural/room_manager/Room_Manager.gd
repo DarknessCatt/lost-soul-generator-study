@@ -1,10 +1,14 @@
 extends Node2D
 
+enum exit_dir {UP, DOWN, LEFT, RIGHT}
+
 var room_list : Array = []
 
 var start_rooms : Dictionary = {"list":[], "pointer":0}
-var normal_rooms : Dictionary = {"list":[], "pointer":0}
+var normal_rooms : Dictionary = {exit_dir.UP:[], exit_dir.DOWN:[], exit_dir.LEFT:[], exit_dir.RIGHT:[]}
 var power_rooms : Dictionary = {"list":[], "pointer":0}
+
+var room_queue : Dictionary = {"list":[], "pointer":0}
 
 func _ready():
 	var path = "res://roomcedural/room_manager/rooms/"
@@ -23,7 +27,17 @@ func _ready():
 		match(room.room_type):
 
 			room.room_types.NORMAL:
-				normal_rooms.list.append(room)
+				if exit_dir.UP in room.exit_directions:
+					normal_rooms[exit_dir.UP].append(room)
+
+				if exit_dir.DOWN in room.exit_directions:
+					normal_rooms[exit_dir.DOWN].append(room)
+
+				if exit_dir.LEFT in room.exit_directions:
+					normal_rooms[exit_dir.LEFT].append(room)
+
+				if exit_dir.RIGHT in room.exit_directions:
+					normal_rooms[exit_dir.RIGHT].append(room)
 
 			room.room_types.START:
 				start_rooms.list.append(room)
@@ -31,20 +45,22 @@ func _ready():
 			room.room_types.POWER:
 				power_rooms.list.append(room)
 
-	normal_rooms.list.shuffle()
+	room_queue.list = normal_rooms[exit_dir.UP]
+	room_queue.list.shuffle()
 	#start_rooms.list.shuffle()
 	#power_rooms.list.shuffle()
 
-func prepare_room_list() -> void:
-	normal_rooms.list.shuffle()
-	normal_rooms.pointer = 0
+func prepare_room_list(dir : int) -> void:
+	room_queue.list = normal_rooms[dir]
+	room_queue.list.shuffle()
+	room_queue.pointer = 0
 
 func get_room():
-	if normal_rooms.pointer >= normal_rooms.list.size():
+	if room_queue.pointer >= room_queue.list.size():
 		return null
 
-	var data = normal_rooms.list[normal_rooms.pointer].get_data()
-	normal_rooms.pointer += 1
+	var data = room_queue.list[room_queue.pointer].get_data()
+	room_queue.pointer += 1
 
 	return data
 

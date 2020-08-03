@@ -22,7 +22,7 @@ func _ready():
 
 	var created_rooms : int = 0
 
-	$Room_Manager.prepare_room_list()
+	$Room_Manager.prepare_room_list(from_direction)
 
 	while created_rooms < 30:
 		#print("Making room in "+str(room_pos))
@@ -91,7 +91,7 @@ func _ready():
 
 				break
 
-		$Room_Manager.prepare_room_list()
+		$Room_Manager.prepare_room_list(from_direction)
 
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	match(direction):
