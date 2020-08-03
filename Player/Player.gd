@@ -1,6 +1,5 @@
 extends KinematicBody2D
 
-
 func _physics_process(delta):
 	var dir := Vector2.ZERO
 

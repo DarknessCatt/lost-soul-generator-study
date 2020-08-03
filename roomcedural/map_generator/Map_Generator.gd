@@ -19,32 +19,21 @@ func _ready():
 			map_data[x].append(null)
 
 	var room_pos = START_POS
-
-	$Room_Manager.prepare_room_list(room_types.START)
-	place_room(room_pos, $Room_Manager.get_room(), $Tile_Map)
-
 	var from_direction : int
+	var exit_data : Array
 
-	match(int(rand_range(0,4))):
+	#Create Start Room
+	$Room_Manager.prepare_room_list(room_types.START)
 
-		exit_dir.UP:
-			from_direction = exit_dir.DOWN
-			room_pos += Vector2.UP
+	var start_room = $Room_Manager.get_room()
+	place_room(start_room, room_pos, $Tile_Map)
+	exit_data = choose_exit(start_room, room_pos)
 
-		exit_dir.DOWN:
-			from_direction = exit_dir.UP
-			room_pos += Vector2.DOWN
+	from_direction = exit_data[0]
+	room_pos = exit_data[1]
 
-		exit_dir.LEFT:
-			from_direction = exit_dir.RIGHT
-			room_pos += Vector2.LEFT
-
-		exit_dir.RIGHT:
-			from_direction = exit_dir.LEFT
-			room_pos += Vector2.RIGHT
-
+	#Create Normal Rooms
 	var created_rooms : int = 0
-
 	$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
 
 	while created_rooms < 30:
@@ -82,30 +71,16 @@ func _ready():
 
 		created_rooms += 1
 		#print("\tmarking rooms in map_data")
-		self.place_room(room_placement_pos, new_room, $Tile_Map)
+		self.place_room(new_room, room_placement_pos, $Tile_Map)
+		exit_data = self.choose_exit(new_room, room_placement_pos)
 
-		for exit in new_room.exits:
-			#print("\tgetting exit from "+str(room_placement_pos+exit[0])+" in direction "+str(exit[1]))
-			if dir_is_valid(room_placement_pos+exit[0], exit[1]):
-				match(exit[1]):
+		if exit_data.empty():
+			print("No Available Exits!")
+			break
 
-					exit_dir.UP:
-						from_direction = exit_dir.DOWN
-						room_pos = room_placement_pos + exit[0] + Vector2.UP
-
-					exit_dir.DOWN:
-						from_direction = exit_dir.UP
-						room_pos = room_placement_pos + exit[0] + Vector2.DOWN
-
-					exit_dir.LEFT:
-						from_direction = exit_dir.RIGHT
-						room_pos = room_placement_pos + exit[0] + Vector2.LEFT
-
-					exit_dir.RIGHT:
-						from_direction = exit_dir.LEFT
-						room_pos = room_placement_pos + exit[0] + Vector2.RIGHT
-
-				break
+		else:
+			from_direction = exit_data[0]
+			room_pos = exit_data[1]
 
 		$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
 
@@ -130,7 +105,7 @@ func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 
 	return true
 
-func place_room(room_placement_pos : Vector2, new_room : Dictionary, tilemap : TileMap) -> void:
+func place_room(new_room : Dictionary, room_placement_pos : Vector2, tilemap : TileMap) -> void:
 	for pos in new_room.positions:
 		var map_pos : Vector2 = room_placement_pos + pos
 		map_data[map_pos.x][map_pos.y] = new_room
@@ -139,3 +114,31 @@ func place_room(room_placement_pos : Vector2, new_room : Dictionary, tilemap : T
 	for tile in new_room.tiles:
 		var tile_pos : Vector2 = tile[0] + room_placement_pos*ROOM_SIZE
 		tilemap.set_cell(tile_pos.x, tile_pos.y, tile[1])
+
+func choose_exit(new_room : Dictionary, room_placement_pos := Vector2.ZERO) -> Array:
+	var exit_data : Array = []
+
+	for exit in new_room.exits:
+		#print("\tgetting exit from "+str(room_placement_pos+exit[0])+" in direction "+str(exit[1]))
+		if dir_is_valid(room_placement_pos+exit[0], exit[1]):
+			match(exit[1]):
+
+				exit_dir.UP:
+					exit_data.append(exit_dir.DOWN)
+					exit_data.append(room_placement_pos + exit[0] + Vector2.UP)
+
+				exit_dir.DOWN:
+					exit_data.append(exit_dir.UP)
+					exit_data.append(room_placement_pos + exit[0] + Vector2.DOWN)
+
+				exit_dir.LEFT:
+					exit_data.append(exit_dir.RIGHT)
+					exit_data.append(room_placement_pos + exit[0] + Vector2.LEFT)
+
+				exit_dir.RIGHT:
+					exit_data.append(exit_dir.LEFT)
+					exit_data.append(room_placement_pos + exit[0] + Vector2.RIGHT)
+
+			break
+
+	return exit_data
