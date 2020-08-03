@@ -3,6 +3,7 @@ extends Node2D
 const ROOM_SIZE : int = 8
 
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
+enum room_types {START, NORMAL, POWER, BONUS}
 
 const MAP_SIZE : Vector2 = Vector2(40, 40)
 const START_POS : Vector2 = Vector2(20, 20)
@@ -17,12 +18,34 @@ func _ready():
 		for _y in range(MAP_SIZE.y):
 			map_data[x].append(null)
 
-	var from_direction = exit_dir.UP
 	var room_pos = START_POS
+
+	$Room_Manager.prepare_room_list(room_types.START)
+	place_room(room_pos, $Room_Manager.get_room(), $Tile_Map)
+
+	var from_direction : int
+
+	match(int(rand_range(0,4))):
+
+		exit_dir.UP:
+			from_direction = exit_dir.DOWN
+			room_pos += Vector2.UP
+
+		exit_dir.DOWN:
+			from_direction = exit_dir.UP
+			room_pos += Vector2.DOWN
+
+		exit_dir.LEFT:
+			from_direction = exit_dir.RIGHT
+			room_pos += Vector2.LEFT
+
+		exit_dir.RIGHT:
+			from_direction = exit_dir.LEFT
+			room_pos += Vector2.RIGHT
 
 	var created_rooms : int = 0
 
-	$Room_Manager.prepare_room_list(from_direction)
+	$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
 
 	while created_rooms < 30:
 		#print("Making room in "+str(room_pos))
@@ -59,14 +82,7 @@ func _ready():
 
 		created_rooms += 1
 		#print("\tmarking rooms in map_data")
-		for pos in new_room.positions:
-			var map_pos : Vector2 = room_placement_pos + pos
-			map_data[map_pos.x][map_pos.y] = new_room
-			#print("\t\t"+str(map_pos))
-
-		for tile in new_room.tiles:
-			var tile_pos : Vector2 = tile[0] + room_placement_pos*ROOM_SIZE
-			$Tile_Map.set_cell(tile_pos.x, tile_pos.y, tile[1])
+		self.place_room(room_placement_pos, new_room, $Tile_Map)
 
 		for exit in new_room.exits:
 			#print("\tgetting exit from "+str(room_placement_pos+exit[0])+" in direction "+str(exit[1]))
@@ -91,7 +107,7 @@ func _ready():
 
 				break
 
-		$Room_Manager.prepare_room_list(from_direction)
+		$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
 
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	match(direction):
@@ -113,3 +129,13 @@ func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 				return false
 
 	return true
+
+func place_room(room_placement_pos : Vector2, new_room : Dictionary, tilemap : TileMap) -> void:
+	for pos in new_room.positions:
+		var map_pos : Vector2 = room_placement_pos + pos
+		map_data[map_pos.x][map_pos.y] = new_room
+		#print("\t\t"+str(map_pos))
+
+	for tile in new_room.tiles:
+		var tile_pos : Vector2 = tile[0] + room_placement_pos*ROOM_SIZE
+		tilemap.set_cell(tile_pos.x, tile_pos.y, tile[1])

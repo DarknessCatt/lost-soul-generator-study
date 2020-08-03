@@ -1,6 +1,7 @@
 extends Node2D
 
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
+enum room_types {START, NORMAL, POWER, BONUS}
 
 var room_list : Array = []
 
@@ -47,11 +48,18 @@ func _ready():
 
 	room_queue.list = normal_rooms[exit_dir.UP]
 	room_queue.list.shuffle()
-	#start_rooms.list.shuffle()
+	start_rooms.list.shuffle()
 	#power_rooms.list.shuffle()
 
-func prepare_room_list(dir : int) -> void:
-	room_queue.list = normal_rooms[dir]
+func prepare_room_list(type: int, dir : int = exit_dir.UP) -> void:
+	match(type):
+
+		room_types.START:
+			room_queue.list = start_rooms.list
+
+		room_types.NORMAL:
+			room_queue.list = normal_rooms[dir]
+
 	room_queue.list.shuffle()
 	room_queue.pointer = 0
 
