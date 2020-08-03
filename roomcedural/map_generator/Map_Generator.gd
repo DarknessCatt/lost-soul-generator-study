@@ -36,12 +36,12 @@ func _ready():
 	var created_rooms : int = 0
 	$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
 
-	while created_rooms < 30:
-		#print("Making room in "+str(room_pos))
+	while created_rooms < 50:
+		#print("Attempting room in "+str(room_pos))
 		var new_room = $Room_Manager.get_room()
 
 		if new_room == null:
-			print("Room List Empty!")
+			print("\tRoom List Empty!")
 			break
 
 		var fits : bool = false
@@ -60,6 +60,7 @@ func _ready():
 					if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
 					   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
 					   map_data[map_pos.x][map_pos.y] != null:
+						#print("\tDoesn't fit because of "+str(map_pos))
 						fits = false
 						break
 
@@ -69,18 +70,17 @@ func _ready():
 		if not fits:
 			continue
 
-		created_rooms += 1
-		#print("\tmarking rooms in map_data")
-		self.place_room(new_room, room_placement_pos, $Tile_Map)
 		exit_data = self.choose_exit(new_room, room_placement_pos)
 
 		if exit_data.empty():
-			print("No Available Exits!")
-			break
+			#print("\tNo Available Exits!")
+			continue
 
-		else:
-			from_direction = exit_data[0]
-			room_pos = exit_data[1]
+		created_rooms += 1
+		self.place_room(new_room, room_placement_pos, $Tile_Map)
+
+		from_direction = exit_data[0]
+		room_pos = exit_data[1]
 
 		$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
 
@@ -106,6 +106,7 @@ func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	return true
 
 func place_room(new_room : Dictionary, room_placement_pos : Vector2, tilemap : TileMap) -> void:
+	#print("\tmarking rooms in map_data")
 	for pos in new_room.positions:
 		var map_pos : Vector2 = room_placement_pos + pos
 		map_data[map_pos.x][map_pos.y] = new_room
