@@ -10,7 +10,10 @@ script = ExtResource( 2 )
 
 [node name="Room_Manager" parent="." instance=ExtResource( 1 )]
 
-[node name="Tile_Map" parent="." instance=ExtResource( 3 )]
+[node name="Tile_Map1" parent="." instance=ExtResource( 3 )]
+
+[node name="Tile_Map2" parent="." instance=ExtResource( 3 )]
+modulate = Color( 0.65098, 0.952941, 0.968627, 1 )
 
 [node name="Player" parent="." instance=ExtResource( 4 )]
 position = Vector2( 7680, 7680 )
