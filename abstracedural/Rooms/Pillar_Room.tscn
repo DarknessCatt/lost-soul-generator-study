@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://abstracedural/Rooms/Pillar_Room.gd" type="Script" id=1]
+[ext_resource path="res://Placeholder_White/Placeholder_White.tscn" type="PackedScene" id=2]
+[ext_resource path="res://abstracedural/Exit.gd" type="Script" id=3]
+
+[sub_resource type="Resource" id=1]
+script = ExtResource( 3 )
+id = 0
+direction = 0
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=2]
+script = ExtResource( 3 )
+id = 1
+direction = 1
+position = Vector2( 0, 1 )
+
+[sub_resource type="RectangleShape2D" id=3]
+extents = Vector2( 32, 32 )
+
+[node name="Pillar_Room" type="Node2D"]
+script = ExtResource( 1 )
+room_positions = [ Vector2( 0, 0 ), Vector2( 0, 1 ) ]
+exits = [ SubResource( 1 ), SubResource( 2 ) ]
+
+[node name="Room" parent="." instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 65536, 0, 0, 65543, 0, 0, 131072, 0, 0, 131079, 0, 0, 196608, 0, 0, 196615, 0, 0, 262144, 0, 0, 262151, 0, 0, 327680, 0, 0, 327687, 0, 0, 393216, 0, 0, 393223, 0, 0, 458752, 0, 0, 458759, 0, 0, 524288, 0, 0, 524295, 0, 0, 589824, 0, 0, 589831, 0, 0, 655360, 0, 0, 655367, 0, 0, 720896, 0, 0, 720903, 0, 0, 786432, 0, 0, 786439, 0, 0, 851968, 0, 0, 851975, 0, 0, 917504, 0, 0, 917511, 0, 0, 983040, 0, 0, 983041, 0, 0, 983042, 0, 0, 983045, 0, 0, 983046, 0, 0, 983047, 0, 0 )
+
+[node name="Up_Exit" type="Area2D" parent="."]
+position = Vector2( 128, -24 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Up_Exit"]
+shape = SubResource( 3 )
+
+[node name="Down_Exit" type="Area2D" parent="."]
+position = Vector2( 128, 536 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Down_Exit"]
+shape = SubResource( 3 )
+[connection signal="body_entered" from="Up_Exit" to="." method="_on_Up_Exit_entered"]
+[connection signal="body_entered" from="Down_Exit" to="." method="_on_Down_Exit_entered"]

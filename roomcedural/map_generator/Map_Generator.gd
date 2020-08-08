@@ -31,25 +31,30 @@ func _ready():
 	start_room["map_position"] = room_pos
 	place_room(start_room, room_pos, $Tile_Map1)
 
-	room_list += make_path(exit_data[1], exit_data[0], 6, $Tile_Map1)
+	room_list += make_path(exit_data[1], exit_data[0], 10, $Tile_Map1)
 
-	for _x in range(rand_range(1, 3)):
-		room_list.pop_front()
+	var room_list_pointer : int = room_list.size() - (randi()%4 + 1)
 
 	while true:
-		if room_list.empty():
+		if room_list_pointer == 0:
 			print("Room List is Empty in Branch!")
 			exit_data = []
 			break
 
-		var branch_room = room_list.pop_front()
+		var branch_room = room_list[room_list_pointer]
 		exit_data = choose_exit(branch_room, branch_room.map_position)
 
 		if not exit_data.empty():
 			break
 
+		room_list_pointer -= 1
+
 	if not exit_data.empty():
-		room_list += make_path(exit_data[1], exit_data[0], 4, $Tile_Map2)
+		room_list += make_path(exit_data[1], exit_data[0], 8, $Tile_Map2)
+
+	#Closing not used exits
+	for room in room_list:
+		close_exits(room)
 
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	match(direction):
@@ -96,6 +101,7 @@ func choose_exit(new_room : Dictionary, room_placement_pos := Vector2.ZERO) -> A
 					exit_data.append(exit_dir.LEFT)
 					exit_data.append(room_placement_pos + exit[0] + Vector2.RIGHT)
 
+			new_room.exits.erase(exit)
 			break
 
 	return exit_data
@@ -152,6 +158,7 @@ func make_path(start_pos : Vector2, start_dir : int, path_limit : int = 4, Tile_
 						break
 
 				if fits:
+					new_room.exits.erase(entrance)
 					break
 
 		if not fits:
@@ -181,3 +188,36 @@ func make_path(start_pos : Vector2, start_dir : int, path_limit : int = 4, Tile_
 	place_room(power_room, room_pos, Tile_Map)
 
 	return rooms_list
+
+func close_exits(room : Dictionary) -> void:
+
+	for exit in room.exits:
+		#check if exit leads to another room
+		var exit_position : Vector2 = (room.map_position + exit[0])*ROOM_SIZE
+		var first_block : Vector2 = Vector2.ZERO
+		var second_block : Vector2 = Vector2.ZERO
+
+		match(exit[1]):
+
+			exit_dir.UP:
+				first_block.x = 3
+				second_block.x = 4
+
+			exit_dir.DOWN:
+				first_block.x = 3
+				first_block.y = 7
+				second_block.x = 4
+				second_block.y = 7
+
+			exit_dir.LEFT:
+				first_block.y = 3
+				second_block.y = 4
+
+			exit_dir.RIGHT:
+				first_block.x = 7
+				first_block.y = 3
+				second_block.x = 7
+				second_block.y = 4
+
+		$Tile_Map1.set_cell(exit_position.x + first_block.x, exit_position.y + first_block.y, 0)
+		$Tile_Map1.set_cell(exit_position.x + second_block.x, exit_position.y + second_block.y, 0)

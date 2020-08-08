@@ -8,9 +8,20 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Node2D",
+"class": "Base_Room",
+"language": "GDScript",
+"path": "res://abstracedural/Base_Room.gd"
+}, {
+"base": "Resource",
+"class": "Exit",
+"language": "GDScript",
+"path": "res://abstracedural/Exit.gd"
+} ]
 _global_script_class_icons={
-
+"Base_Room": "",
+"Exit": ""
 }
 
 [application]
