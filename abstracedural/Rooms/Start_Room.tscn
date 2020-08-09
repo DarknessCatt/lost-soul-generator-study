@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://abstracedural/Rooms/Start_Room.gd" type="Script" id=1]
+[ext_resource path="res://abstracedural/Exit.gd" type="Script" id=2]
+[ext_resource path="res://Placeholder_White/Placeholder_White.tscn" type="PackedScene" id=3]
+
+[sub_resource type="Resource" id=1]
+script = ExtResource( 2 )
+id = 0
+direction = 1
+position = Vector2( 0, 0 )
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 32, 10 )
+
+[node name="Start_Room" type="Node2D"]
+script = ExtResource( 1 )
+room_type = 0
+exits = [ SubResource( 1 ) ]
+
+[node name="Room" parent="." instance=ExtResource( 3 )]
+tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 65536, 0, 0, 65537, 0, 0, 65539, 0, 0, 65540, 0, 0, 65542, 0, 0, 65543, 0, 0, 131072, 0, 0, 131079, 0, 0, 196608, 0, 0, 196609, 0, 0, 196614, 0, 0, 196615, 0, 0, 262144, 0, 0, 262145, 0, 0, 262150, 0, 0, 262151, 0, 0, 327680, 0, 0, 327687, 0, 0, 393216, 0, 0, 393217, 0, 0, 393222, 0, 0, 393223, 0, 0, 458752, 0, 0, 458753, 0, 0, 458754, 0, 0, 458757, 0, 0, 458758, 0, 0, 458759, 0, 0 )
+
+[node name="Exit" type="Area2D" parent="."]
+position = Vector2( 128, 256 )
+monitorable = false
+collision_layer = 0
+
+[node name="area" type="CollisionShape2D" parent="Exit"]
+shape = SubResource( 2 )
+[connection signal="body_entered" from="Exit" to="." method="_on_Exit_entered"]
