@@ -1,0 +1,86 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Placeholder_White/Placeholder_White.tscn" type="PackedScene" id=1]
+[ext_resource path="res://abstracedural/Rooms/Big_Room.gd" type="Script" id=2]
+[ext_resource path="res://abstracedural/Exit.gd" type="Script" id=3]
+
+[sub_resource type="Resource" id=1]
+script = ExtResource( 3 )
+id = 0
+direction = 0
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=2]
+script = ExtResource( 3 )
+id = 1
+direction = 0
+position = Vector2( 1, 0 )
+
+[sub_resource type="Resource" id=3]
+script = ExtResource( 3 )
+id = 2
+direction = 1
+position = Vector2( 0, 1 )
+
+[sub_resource type="Resource" id=4]
+script = ExtResource( 3 )
+id = 3
+direction = 1
+position = Vector2( 1, 1 )
+
+[sub_resource type="Resource" id=5]
+script = ExtResource( 3 )
+id = 4
+direction = 3
+position = Vector2( 1, 1 )
+
+[sub_resource type="RectangleShape2D" id=6]
+extents = Vector2( 32, 8 )
+
+[sub_resource type="RectangleShape2D" id=7]
+extents = Vector2( 8, 32 )
+
+[node name="Big_Room" type="Node2D"]
+script = ExtResource( 2 )
+room_positions = [ Vector2( 0, 0 ), Vector2( 1, 0 ), Vector2( 0, 1 ), Vector2( 1, 1 ) ]
+exits = [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ), SubResource( 5 ) ]
+
+[node name="Placeholder_White" parent="." instance=ExtResource( 1 )]
+tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 13, 0, 0, 14, 0, 0, 15, 0, 0, 65536, 0, 0, 65543, 0, 0, 65544, 0, 0, 65551, 0, 0, 131072, 0, 0, 131079, 0, 0, 131080, 0, 0, 131087, 0, 0, 196608, 0, 0, 196615, 0, 0, 196616, 0, 0, 196623, 0, 0, 262144, 0, 0, 262151, 0, 0, 262152, 0, 0, 262159, 0, 0, 327680, 0, 0, 327687, 0, 0, 327688, 0, 0, 327695, 0, 0, 393216, 0, 0, 393223, 0, 0, 393224, 0, 0, 393231, 0, 0, 458752, 0, 0, 458767, 0, 0, 524288, 0, 0, 524303, 0, 0, 589824, 0, 0, 589831, 0, 0, 589832, 0, 0, 589839, 0, 0, 655360, 0, 0, 655367, 0, 0, 655368, 0, 0, 655375, 0, 0, 720896, 0, 0, 720903, 0, 0, 720904, 0, 0, 786432, 0, 0, 786439, 0, 0, 786440, 0, 0, 851968, 0, 0, 851975, 0, 0, 851976, 0, 0, 851983, 0, 0, 917504, 0, 0, 917511, 0, 0, 917512, 0, 0, 917519, 0, 0, 983040, 0, 0, 983041, 0, 0, 983042, 0, 0, 983045, 0, 0, 983046, 0, 0, 983047, 0, 0, 983048, 0, 0, 983049, 0, 0, 983050, 0, 0, 983053, 0, 0, 983054, 0, 0, 983055, 0, 0 )
+
+[node name="First_Up" type="Area2D" parent="."]
+position = Vector2( 128, -24 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="First_Up"]
+shape = SubResource( 6 )
+
+[node name="Second_Up" type="Area2D" parent="."]
+position = Vector2( 384, -24 )
+
+[node name="Area" type="CollisionShape2D" parent="Second_Up"]
+shape = SubResource( 6 )
+
+[node name="First_Down" type="Area2D" parent="."]
+position = Vector2( 128, 536 )
+
+[node name="Area" type="CollisionShape2D" parent="First_Down"]
+shape = SubResource( 6 )
+
+[node name="Second_Down" type="Area2D" parent="."]
+position = Vector2( 384, 536 )
+
+[node name="Area" type="CollisionShape2D" parent="Second_Down"]
+shape = SubResource( 6 )
+
+[node name="Right" type="Area2D" parent="."]
+position = Vector2( 536, 384 )
+
+[node name="Area" type="CollisionShape2D" parent="Right"]
+shape = SubResource( 7 )
+[connection signal="body_entered" from="First_Up" to="." method="_on_First_Up_body_entered"]
+[connection signal="body_entered" from="Second_Up" to="." method="_on_Second_Up_body_entered"]
+[connection signal="body_entered" from="First_Down" to="." method="_on_First_Down_body_entered"]
+[connection signal="body_entered" from="Second_Down" to="." method="_on_Second_Down_body_entered"]
+[connection signal="body_entered" from="Right" to="." method="_on_Right_body_entered"]

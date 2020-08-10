@@ -39,7 +39,7 @@ exits = [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 )
 tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 65536, 0, 0, 65543, 0, 0, 131072, 0, 0, 131079, 0, 0, 327680, 0, 0, 327687, 0, 0, 393216, 0, 0, 393223, 0, 0, 458752, 0, 0, 458753, 0, 0, 458754, 0, 0, 458757, 0, 0, 458758, 0, 0, 458759, 0, 0 )
 
 [node name="Up_Exit" type="Area2D" parent="."]
-position = Vector2( 128, -24 )
+position = Vector2( 128, -48 )
 monitorable = false
 collision_layer = 0
 
@@ -47,7 +47,7 @@ collision_layer = 0
 shape = SubResource( 5 )
 
 [node name="Down_Exit" type="Area2D" parent="."]
-position = Vector2( 128, 280 )
+position = Vector2( 128, 304 )
 monitorable = false
 collision_layer = 0
 
@@ -55,7 +55,7 @@ collision_layer = 0
 shape = SubResource( 5 )
 
 [node name="Left_Exit" type="Area2D" parent="."]
-position = Vector2( -24, 128 )
+position = Vector2( -48, 128 )
 monitorable = false
 collision_layer = 0
 
@@ -63,7 +63,7 @@ collision_layer = 0
 shape = SubResource( 5 )
 
 [node name="Right_Exit" type="Area2D" parent="."]
-position = Vector2( 280, 128 )
+position = Vector2( 304, 128 )
 monitorable = false
 collision_layer = 0
 

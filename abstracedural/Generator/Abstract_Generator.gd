@@ -33,7 +33,7 @@ func _ready():
 	exit_data = choose_exit(start_room, room_pos)
 	place_room(start_room)
 
-	room_list += make_path(START_POS, exit_data[1], exit_data[0], 3)
+	room_list += make_path(START_POS, exit_data[2], exit_data[1], exit_data[0], 3)
 
 #	var room_list_pointer : int = room_list.size() - (randi()%4 + 1)
 #
@@ -124,6 +124,7 @@ func choose_exit(new_room : Dictionary, room_placement_pos : Vector2) -> Array:
 					exit_data.append(exit_dir.LEFT)
 					exit_data.append(room_placement_pos + exit.position + Vector2.RIGHT)
 
+			exit_data.append(exit.id)
 			new_room.exits.append({"id": exit.id, "to": exit_data[1]})
 			break
 
@@ -138,11 +139,12 @@ func place_room(room_data : Dictionary) -> void:
 		map_data[map_pos.x][map_pos.y] = room_data
 		#print("\t\t"+str(map_pos))
 
-func make_path(start_from: Vector2, start_pos : Vector2, start_dir : int, path_limit : int = 4) -> Array:
+func make_path(start_from: Vector2, from_exit_id: int, start_pos : Vector2, start_dir : int, path_limit : int = 4) -> Array:
 
 	var rooms_list : Array = []
 
 	var from_pos : Vector2 = start_from
+	var from_id : int = from_exit_id
 	var room_pos : Vector2 = start_pos
 	var from_direction : int = start_dir
 
@@ -161,6 +163,7 @@ func make_path(start_from: Vector2, start_pos : Vector2, start_dir : int, path_l
 			break
 
 		var fits : bool = false
+		var exit_info : Dictionary = {}
 		var room_placement_pos : Vector2
 
 		new_room.node.exits.shuffle()
@@ -181,7 +184,8 @@ func make_path(start_from: Vector2, start_pos : Vector2, start_dir : int, path_l
 						break
 
 				if fits:
-					new_room["exits"] = [{"id": entrance.id, "to": from_pos}]
+					new_room["exits"] = []
+					exit_info = {"id": entrance.id, "to": from_pos, "entrance": from_id}
 					break
 
 		if not fits:
@@ -193,6 +197,10 @@ func make_path(start_from: Vector2, start_pos : Vector2, start_dir : int, path_l
 			#print("\tNo Available Exits!")
 			continue
 
+		new_room["exits"].append(exit_info)
+
+		find_exit_id(from_id, map_data[from_pos.x][from_pos.y].exits)["entrance"] = exit_info.id
+
 		created_rooms += 1
 		new_room["map_position"] = room_placement_pos
 		rooms_list.append(new_room)
@@ -201,6 +209,7 @@ func make_path(start_from: Vector2, start_pos : Vector2, start_dir : int, path_l
 		from_direction = exit_data[0]
 		from_pos = room_pos
 		room_pos = exit_data[1]
+		from_id = exit_data[2]
 
 		$Room_Manager.prepare_room_list(room_types.NORMAL, from_direction)
 
@@ -222,13 +231,13 @@ func change_room(next_room : Vector2, exit_pos : Vector2):
 	self.call_deferred("remove_child", room)
 
 	cur_pos = next_room
-	print(cur_pos+exit_pos)
+	print(exit_pos)
 	room = map_data[cur_pos.x][cur_pos.y].node
+
+	$Player.position = Vector2(128+int(exit_pos.x)*256, 128+(exit_pos.y)*256)
 
 	self.call_deferred("add_child", room)
 	room.call_deferred("connect", "player_exited", self, "_room_exited")
-
-	$Player.position = Vector2(128*int(exit_pos.x+1.5), 128*(exit_pos.y+1.5))
 
 func _room_exited(exit_id : int):
 	var cur_room = map_data[cur_pos.x][cur_pos.y]
@@ -236,7 +245,18 @@ func _room_exited(exit_id : int):
 	for exit in cur_room.exits:
 		if exit.id == exit_id:
 			if map_data[exit.to.x][exit.to.y] != null:
-				change_room(exit.to, Vector2.ZERO)
+				var pos = find_exit_id(exit.entrance, map_data[exit.to.x][exit.to.y].node.exits).position
+				change_room(exit.to, pos)
 			else:
 				print("no exit")
 			break
+
+func find_exit_id(id : int, exits : Array):
+	var exit_data
+
+	for exit in exits:
+		if exit.id == id:
+			exit_data = exit
+			break
+
+	return exit_data
