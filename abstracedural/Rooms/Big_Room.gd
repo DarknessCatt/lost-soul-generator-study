@@ -16,7 +16,5 @@ func _on_Right_body_entered(_body):
 	emit_signal("player_exited", 4)
 
 func open_exits(exits : Array):
-
 	$Exit_Blocks.show()
-
 	for exit in exits: $Exit_Blocks.remove_child($Exit_Blocks.get_node(str(exit.id)))

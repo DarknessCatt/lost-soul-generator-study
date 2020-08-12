@@ -18,7 +18,6 @@ func _ready():
 		for _y in range(MAP_SIZE.y):
 			map_data[x].append(null)
 
-	var room_list : Array = []
 	var room_pos = START_POS
 	var start_data : Dictionary
 
@@ -27,12 +26,15 @@ func _ready():
 
 	var start_room : Dictionary = {}
 	start_room["node"] = $Room_Manager.get_room()
+	start_room.node.exits.shuffle()
 	start_room["map_position"] = room_pos
 	start_data = choose_exit(start_room, room_pos)
 	start_room["exits"] = [{"id": start_data.id, "to": start_data.to}]
 	start_data["pos"] = room_pos
 	start_data["exit"] = start_room["exits"][0]
 	place_room(start_room)
+
+	var room_list : Array = [start_room]
 
 	room_list += make_path(start_data, 3)
 
@@ -165,12 +167,33 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 		$Room_Manager.prepare_room_list(room_types.NORMAL, previous_room.exit_dir)
 
 	#Adding Power Room
-#	$Room_Manager.prepare_room_list(room_types.POWER)
-#	var power_room = $Room_Manager.get_room()
-#	exit_data = choose_exit(power_room, room_pos)
-#	power_room["map_position"] = room_pos
-#	place_room(power_room)
+	$Room_Manager.prepare_room_list(room_types.POWER)
+	var power_room : Dictionary = {}
+	power_room["node"] = $Room_Manager.get_room()
 
+	for entrance in power_room.node.exits:
+		if entrance.direction == previous_room.exit_dir:
+
+			var room_placement_pos = room_pos - entrance.position
+			var fits = true
+
+			for pos in power_room.node.room_positions:
+				var map_pos : Vector2 = room_placement_pos + pos
+				if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
+				   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
+				   map_data[map_pos.x][map_pos.y] != null:
+					#print("\tDoesn't fit because of "+str(map_pos))
+					fits = false
+					break
+
+			if fits:
+				previous_room.exit_dic["entrance"] = entrance.id
+				power_room["map_position"] = room_placement_pos
+				power_room["exits"] = [{"id": entrance.id, "to": previous_room.pos, "entrance": previous_room.exit_id}]
+				break
+
+	place_room(power_room)
+	rooms_list.append(power_room)
 	return rooms_list
 
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
