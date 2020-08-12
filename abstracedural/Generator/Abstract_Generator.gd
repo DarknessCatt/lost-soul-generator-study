@@ -222,34 +222,38 @@ func make_path(start_from: Vector2, from_exit_id: int, start_pos : Vector2, star
 
 	return rooms_list
 
+var changing : bool = false
 var cur_pos : Vector2 = START_POS
 
 func change_room(next_room : Vector2, exit_pos : Vector2):
+	changing = true
+	$can_exit.start()
 	var room = map_data[cur_pos.x][cur_pos.y].node
 	room.call_deferred("disconnect", "player_exited", self, "_room_exited")
 
 	self.call_deferred("remove_child", room)
 
 	cur_pos = next_room
-	print(exit_pos)
+	#print(exit_pos)
 	room = map_data[cur_pos.x][cur_pos.y].node
 
-	$Player.position = Vector2(128+int(exit_pos.x)*256, 128+(exit_pos.y)*256)
+	$Player.position = Vector2(128*(1+int(exit_pos.x)*2), 128*(1+int(exit_pos.y)*2))
 
 	self.call_deferred("add_child", room)
 	room.call_deferred("connect", "player_exited", self, "_room_exited")
 
 func _room_exited(exit_id : int):
-	var cur_room = map_data[cur_pos.x][cur_pos.y]
+	if not changing:
+		var cur_room = map_data[cur_pos.x][cur_pos.y]
 
-	for exit in cur_room.exits:
-		if exit.id == exit_id:
-			if map_data[exit.to.x][exit.to.y] != null:
-				var pos = find_exit_id(exit.entrance, map_data[exit.to.x][exit.to.y].node.exits).position
-				change_room(exit.to, pos)
-			else:
-				print("no exit")
-			break
+		for exit in cur_room.exits:
+			if exit.id == exit_id:
+				if map_data[exit.to.x][exit.to.y] != null:
+					var pos = find_exit_id(exit.entrance, map_data[exit.to.x][exit.to.y].node.exits).position
+					change_room(exit.to, pos)
+				else:
+					print("no exit")
+				break
 
 func find_exit_id(id : int, exits : Array):
 	var exit_data
@@ -260,3 +264,6 @@ func find_exit_id(id : int, exits : Array):
 			break
 
 	return exit_data
+
+func _on_can_exit_timeout():
+	changing = false
