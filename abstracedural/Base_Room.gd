@@ -14,3 +14,6 @@ signal player_exited(exit)
 func _ready():
 	for exit in exits:
 		assert(exit.position in room_positions)
+
+func open_exits(_exits : Array):
+	pass

@@ -69,6 +69,21 @@ collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Right_Exit"]
 shape = SubResource( 5 )
+
+[node name="Exit_Blocks" type="Node2D" parent="."]
+visible = false
+
+[node name="Up" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 3, 0, 0, 4, 0, 0 )
+
+[node name="Down" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 458755, 0, 0, 458756, 0, 0 )
+
+[node name="Left" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 196608, 0, 0, 262144, 0, 0 )
+
+[node name="Right" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 196615, 0, 0, 262151, 0, 0 )
 [connection signal="body_entered" from="Up_Exit" to="." method="_on_Up_Exit_entered"]
 [connection signal="body_entered" from="Down_Exit" to="." method="_on_Down_Exit_entered"]
 [connection signal="body_entered" from="Left_Exit" to="." method="_on_Left_Exit_entered"]

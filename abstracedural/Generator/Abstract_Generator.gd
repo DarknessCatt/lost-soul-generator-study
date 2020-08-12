@@ -76,6 +76,8 @@ func _ready():
 
 	print(map)
 
+	for room in room_list: room.node.open_exits(room.exits)
+
 	self.add_child(map_data[cur_pos.x][cur_pos.y].node)
 	map_data[cur_pos.x][cur_pos.y].node.connect("player_exited", self, "_room_exited")
 	$Player.position = Vector2(128, 128)
@@ -168,8 +170,6 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 #	exit_data = choose_exit(power_room, room_pos)
 #	power_room["map_position"] = room_pos
 #	place_room(power_room)
-
-	print(start_data.exit)
 
 	return rooms_list
 
