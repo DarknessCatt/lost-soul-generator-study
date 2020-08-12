@@ -36,47 +36,47 @@ func _ready():
 
 	var room_list : Array = [start_room]
 
-	room_list += make_path(start_data, 3)
+	room_list += make_path(start_data, 5)
 
-#	var room_list_pointer : int = room_list.size() - (randi()%4 + 1)
+	var room_list_pointer : int = room_list.size() - (randi()%4+1)
+	var branch_data = {}
+
+	while true:
+		if room_list_pointer == 0:
+			print("Room List is Empty in Branch!")
+			start_data = {}
+			break
+
+		var branch_room = room_list[room_list_pointer]
+		branch_data = choose_exit(branch_room, branch_room.map_position)
+
+		if not start_data.empty():
+			branch_room["exits"].append({"id": branch_data.id, "to": branch_data.to})
+			branch_data["pos"] = branch_room.map_position
+			branch_data["exit"] = branch_room["exits"].back()
+			break
+
+		room_list_pointer -= 1
+
+	if not start_data.empty():
+		room_list += make_path(branch_data, 3)
+
+#	var map : String = ""
+
+#	for x in range(MAP_SIZE.x):
+#		for y in range(MAP_SIZE.y):
+#			if x == START_POS.x and y == START_POS.y:
+#				map += "[S]"
 #
-#	while true:
-#		if room_list_pointer == 0:
-#			print("Room List is Empty in Branch!")
-#			exit_data = []
-#			break
+#			elif map_data[y][x] == null:
+#				map += "[ ]"
 #
-#		var branch_room = room_list[room_list_pointer]
-#		exit_data = choose_exit(branch_room, branch_room.map_position)
+#			else:
+#				map += "[X]"
 #
-#		if not exit_data.empty():
-#			break
+#		map += "\n"
 #
-#		room_list_pointer -= 1
-#
-#	if not exit_data.empty():
-#		room_list += make_path(exit_data[1], exit_data[0], 8, $Tile_Map2)
-#
-#	#Closing not used exits
-#	for room in room_list:
-#		close_exits(room)
-
-	var map : String = ""
-
-	for x in range(MAP_SIZE.x):
-		for y in range(MAP_SIZE.y):
-			if x == START_POS.x and y == START_POS.y:
-				map += "[S]"
-
-			elif map_data[y][x] == null:
-				map += "[ ]"
-
-			else:
-				map += "[X]"
-
-		map += "\n"
-
-	print(map)
+#	print(map)
 
 	for room in room_list: room.node.open_exits(room.exits)
 
