@@ -38,19 +38,47 @@ func _ready():
 
 	room_list += make_path(start_data, 5)
 
-	var room_list_pointer : int = room_list.size() - (randi()%4+1)
+	room_list += make_branch(room_list)
+	room_list += make_branch(room_list, 6)
+	room_list += make_branch(room_list, 7, 6)
+
+	var map : String = ""
+
+	for x in range(MAP_SIZE.x):
+		for y in range(MAP_SIZE.y):
+			if x == START_POS.x and y == START_POS.y:
+				map += "[S]"
+
+			elif map_data[y][x] == null:
+				map += "[ ]"
+
+			else:
+				map += "[X]"
+
+		map += "\n"
+
+	print(map)
+
+	for room in room_list: room.node.open_exits(room.exits)
+
+	self.add_child(map_data[cur_pos.x][cur_pos.y].node)
+	map_data[cur_pos.x][cur_pos.y].node.connect("player_exited", self, "_room_exited")
+	$Player.position = Vector2(128, 128)
+
+func make_branch(room_list : Array, initial_backtrack : int = 4, size : int = 3):
+	var room_list_pointer : int = room_list.size() - (randi()%initial_backtrack+1)
 	var branch_data = {}
 
 	while true:
 		if room_list_pointer == 0:
 			print("Room List is Empty in Branch!")
-			start_data = {}
+			branch_data = {}
 			break
 
 		var branch_room = room_list[room_list_pointer]
 		branch_data = choose_exit(branch_room, branch_room.map_position)
 
-		if not start_data.empty():
+		if not branch_data.empty():
 			branch_room["exits"].append({"id": branch_data.id, "to": branch_data.to})
 			branch_data["pos"] = branch_room.map_position
 			branch_data["exit"] = branch_room["exits"].back()
@@ -58,31 +86,11 @@ func _ready():
 
 		room_list_pointer -= 1
 
-	if not start_data.empty():
-		room_list += make_path(branch_data, 3)
+	if not branch_data.empty():
+		return make_path(branch_data, size)
 
-#	var map : String = ""
-
-#	for x in range(MAP_SIZE.x):
-#		for y in range(MAP_SIZE.y):
-#			if x == START_POS.x and y == START_POS.y:
-#				map += "[S]"
-#
-#			elif map_data[y][x] == null:
-#				map += "[ ]"
-#
-#			else:
-#				map += "[X]"
-#
-#		map += "\n"
-#
-#	print(map)
-
-	for room in room_list: room.node.open_exits(room.exits)
-
-	self.add_child(map_data[cur_pos.x][cur_pos.y].node)
-	map_data[cur_pos.x][cur_pos.y].node.connect("player_exited", self, "_room_exited")
-	$Player.position = Vector2(128, 128)
+	else:
+		return []
 
 # start_data:
 #	pos = position of the original room
