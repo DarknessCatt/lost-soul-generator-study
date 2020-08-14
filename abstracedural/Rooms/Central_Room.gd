@@ -16,8 +16,8 @@ func open_exits(exits : Array):
 
 	$Exit_Blocks.show()
 
-	for exit in exits:
-		match(exit.id):
+	for exit_data in exits:
+		match(exit_data.exit.id):
 
 			0: $Exit_Blocks.remove_child($Exit_Blocks/Up)
 			1: $Exit_Blocks.remove_child($Exit_Blocks/Down)

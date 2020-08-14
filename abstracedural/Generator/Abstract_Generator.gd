@@ -29,7 +29,7 @@ func _ready():
 	start_room.node.exits.shuffle()
 	start_room["map_position"] = room_pos
 	start_data = choose_exit(start_room, room_pos)
-	start_room["exits"] = [{"id": start_data.id, "to": start_data.to}]
+	start_room["exits"] = [{"exit":start_data.exit, "to": start_data.to}]
 	start_data["pos"] = room_pos
 	start_data["exit"] = start_room["exits"][0]
 	place_room(start_room)
@@ -79,7 +79,7 @@ func make_branch(room_list : Array, initial_backtrack : int = 4, size : int = 3)
 		branch_data = choose_exit(branch_room, branch_room.map_position)
 
 		if not branch_data.empty():
-			branch_room["exits"].append({"id": branch_data.id, "to": branch_data.to})
+			branch_room["exits"].append({"exit": branch_data.exit, "to": branch_data.to})
 			branch_data["pos"] = branch_room.map_position
 			branch_data["exit"] = branch_room["exits"].back()
 			break
@@ -94,15 +94,14 @@ func make_branch(room_list : Array, initial_backtrack : int = 4, size : int = 3)
 
 # start_data:
 #	pos = position of the original room
-#	id = exit.id from original room
+#	exit = exit from original room
 #	to = position of the new room
 #	dir = direction it comes from
-#	entrance = pointer to previous exit
 func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 
 	var rooms_list : Array = []
 
-	var previous_room : Dictionary = {"pos": start_data.pos, "exit_id": start_data.id, "exit_dir": start_data.dir, "exit_dic": start_data.exit}
+	var previous_room : Dictionary = {"pos": start_data.pos, "exit_data": start_data.exit, "exit_dir": start_data.dir}
 	var room_pos : Vector2 = start_data.to
 
 	#Create Normal Rooms
@@ -142,7 +141,7 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 						break
 
 				if fits:
-					return_exit_info = {"id": entrance.id, "to": previous_room.pos, "entrance": previous_room.exit_id}
+					return_exit_info = {"exit": entrance, "to": previous_room.pos, "entrance": previous_room.exit_data.exit}
 					break
 
 		if not fits:
@@ -154,21 +153,20 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 			#print("\tNo Available Exits!")
 			continue
 
-		var next_exit : Dictionary = {"id": exit_data.id, "to": exit_data.to}
+		var next_exit : Dictionary = {"exit": exit_data.exit, "to": exit_data.to}
 
 		new_room["exits"] = [next_exit]
 		new_room["exits"].append(return_exit_info)
-		previous_room.exit_dic["entrance"] = return_exit_info.id
+		previous_room.exit_data["entrance"] = return_exit_info.exit
 
 		created_rooms += 1
 		new_room["map_position"] = room_placement_pos
 		rooms_list.append(new_room)
 		self.place_room(new_room)
 
-		previous_room.exit_id = exit_data.id
+		previous_room.exit_data = next_exit
 		previous_room.exit_dir = exit_data.dir
 		previous_room.pos = room_pos
-		previous_room.exit_dic = next_exit
 
 		room_pos = exit_data.to
 
@@ -195,9 +193,9 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 					break
 
 			if fits:
-				previous_room.exit_dic["entrance"] = entrance.id
+				previous_room.exit_data["entrance"] = entrance
 				power_room["map_position"] = room_placement_pos
-				power_room["exits"] = [{"id": entrance.id, "to": previous_room.pos, "entrance": previous_room.exit_id}]
+				power_room["exits"] = [{"exit": entrance, "to": previous_room.pos, "entrance": previous_room.exit_data.exit}]
 				break
 
 	place_room(power_room)
@@ -249,8 +247,7 @@ func choose_exit(new_room : Dictionary, room_placement_pos : Vector2) -> Diction
 					exit_data["dir"] = exit_dir.LEFT
 					exit_data["to"] = (room_placement_pos + exit.position + Vector2.RIGHT)
 
-			exit_data["id"] = exit.id
-			#new_room.exits.append({"id": exit.id, "to": exit_data[1]})
+			exit_data["exit"] = exit
 			break
 
 	return exit_data
@@ -288,13 +285,9 @@ func _room_exited(exit_id : int):
 	if not changing:
 		var cur_room = map_data[cur_pos.x][cur_pos.y]
 
-		for exit in cur_room.exits:
-			if exit.id == exit_id:
-				if map_data[exit.to.x][exit.to.y] != null:
-					var pos = find_exit_id(exit.entrance, map_data[exit.to.x][exit.to.y].node.exits).position
-					change_room(exit.to, pos)
-				else:
-					print("no exit")
+		for exit_data in cur_room.exits:
+			if exit_data.exit.id == exit_id:
+				change_room(exit_data.to, exit_data.entrance.position)
 				break
 
 func find_exit_id(id : int, exits : Array):
