@@ -142,6 +142,7 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 
 				if fits:
 					return_exit_info = {"exit": entrance, "to": previous_room.pos, "entrance": previous_room.exit_data.exit}
+					new_room.node.exits.erase(entrance)
 					break
 
 		if not fits:
@@ -158,6 +159,7 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 		new_room["exits"] = [next_exit]
 		new_room["exits"].append(return_exit_info)
 		previous_room.exit_data["entrance"] = return_exit_info.exit
+		map_data[previous_room.pos.x][previous_room.pos.y].node.exits.erase(previous_room.exit_data.exit)
 
 		created_rooms += 1
 		new_room["map_position"] = room_placement_pos
@@ -194,8 +196,10 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 
 			if fits:
 				previous_room.exit_data["entrance"] = entrance
+				map_data[previous_room.pos.x][previous_room.pos.y].node.exits.erase(previous_room.exit_data)
 				power_room["map_position"] = room_placement_pos
 				power_room["exits"] = [{"exit": entrance, "to": previous_room.pos, "entrance": previous_room.exit_data.exit}]
+				power_room.node.exits.erase(entrance)
 				break
 
 	place_room(power_room)
