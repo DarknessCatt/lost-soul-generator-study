@@ -42,6 +42,8 @@ func _ready():
 	room_list += make_branch(room_list, 6)
 	room_list += make_branch(room_list, 7, 6)
 
+	make_cycles(room_list)
+
 	var map : String = ""
 
 	for x in range(MAP_SIZE.x):
@@ -64,6 +66,52 @@ func _ready():
 	self.add_child(map_data[cur_pos.x][cur_pos.y].node)
 	map_data[cur_pos.x][cur_pos.y].node.connect("player_exited", self, "_room_exited")
 	$Player.position = Vector2(128, 128)
+
+func make_cycles(room_list : Array) -> void:
+
+	for room in room_list:
+		for exit in room.node.exits:
+			var leads_to : Vector2 = room.map_position + exit.position
+			var entrance_dir : int
+
+			match(exit.direction):
+
+				exit_dir.UP:
+					leads_to += Vector2.UP
+					entrance_dir = exit_dir.DOWN
+
+				exit_dir.DOWN:
+					leads_to += Vector2.DOWN
+					entrance_dir = exit_dir.UP
+
+				exit_dir.RIGHT:
+					leads_to += Vector2.RIGHT
+					entrance_dir = exit_dir.LEFT
+
+				exit_dir.LEFT:
+					leads_to += Vector2.LEFT
+					entrance_dir = exit_dir.RIGHT
+
+			if 	leads_to.x < 0 or leads_to.x >= MAP_SIZE.x or \
+				leads_to.y < 0 or leads_to.y >= MAP_SIZE.y or \
+				map_data[leads_to.x][leads_to.y] == null:
+					continue
+
+			var other_room = map_data[leads_to.x][leads_to.y]
+
+			for entrance in other_room.node.exits:
+				if 	entrance.direction == entrance_dir and \
+					leads_to.x == (other_room.map_position.x + entrance.position.x) and \
+					leads_to.y == (other_room.map_position.y + entrance.position.y):
+
+						if rand_range(0, 1) < 0.5:
+							room.exits.append({"exit": exit, "to": leads_to, "entrance": entrance})
+							other_room.exits.append({"exit": entrance, "to": (room.map_position + exit.position), "entrance": exit})
+
+						room.node.exits.erase(exit)
+						other_room.node.exits.erase(entrance)
+						break
+
 
 func make_branch(room_list : Array, initial_backtrack : int = 4, size : int = 3):
 	var room_list_pointer : int = room_list.size() - (randi()%initial_backtrack+1)
