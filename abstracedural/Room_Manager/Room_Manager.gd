@@ -53,6 +53,12 @@ func _ready():
 			room.room_types.POWER:
 				power_rooms.list.append(room)
 
+	print("Room Direction Distribution:")
+	print("UP: "+str(normal_rooms[exit_dir.UP].size()))
+	print("DOWN: "+str(normal_rooms[exit_dir.DOWN].size()))
+	print("LEFT: "+str(normal_rooms[exit_dir.LEFT].size()))
+	print("RIGHT: "+str(normal_rooms[exit_dir.RIGHT].size()))
+
 	room_queue.list = normal_rooms[exit_dir.UP]
 	room_queue.list.shuffle()
 	start_rooms.list.shuffle()
