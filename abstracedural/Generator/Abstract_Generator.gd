@@ -3,10 +3,10 @@ extends Node2D
 const ROOM_SIZE : int = 8
 
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
-enum room_types {START, NORMAL, POWER, BONUS}
+enum room_types {START, NORMAL, POWER, BONUS, GATE}
 
-const MAP_SIZE : Vector2 = Vector2(10, 10)
-const START_POS : Vector2 = Vector2(5, 5)
+const MAP_SIZE : Vector2 = Vector2(20, 20)
+const START_POS : Vector2 = Vector2(10, 10)
 
 var map_data : Array
 
@@ -104,7 +104,9 @@ func make_cycles(room_list : Array) -> void:
 					leads_to.x == (other_room.map_position.x + entrance.position.x) and \
 					leads_to.y == (other_room.map_position.y + entrance.position.y):
 
-						if rand_range(0, 1) < 0.5:
+						if  (room.node.room_type == room_types.NORMAL or \
+							other_room.node.room_type == room_types.NORMAL) and \
+							rand_range(0, 1) < 0.5:
 							room.exits.append({"exit": exit, "to": leads_to, "entrance": entrance})
 							other_room.exits.append({"exit": entrance, "to": (room.map_position + exit.position), "entrance": exit})
 
@@ -223,7 +225,7 @@ func make_path(start_data : Dictionary, path_limit : int = 4) -> Array:
 		$Room_Manager.prepare_room_list(room_types.NORMAL, previous_room.exit_dir)
 
 	#Adding Power Room
-	$Room_Manager.prepare_room_list(room_types.POWER)
+	$Room_Manager.prepare_room_list(room_types.BONUS)
 	var power_room : Dictionary = {}
 	power_room["node"] = $Room_Manager.get_room()
 

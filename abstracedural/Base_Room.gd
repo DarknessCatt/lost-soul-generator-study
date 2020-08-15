@@ -3,7 +3,7 @@ extends Node2D
 class_name Base_Room
 
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
-enum room_types {START, NORMAL, POWER, BONUS}
+enum room_types {START, NORMAL, POWER, BONUS, GATE}
 
 export(room_types) var room_type : int = room_types.NORMAL
 export(Array, Vector2) var room_positions : Array = [Vector2(0,0)]

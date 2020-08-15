@@ -1,0 +1,48 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://abstracedural/Rooms/Gate_Room.gd" type="Script" id=1]
+[ext_resource path="res://Placeholder_White/Placeholder_White.tscn" type="PackedScene" id=2]
+[ext_resource path="res://abstracedural/Exit.gd" type="Script" id=3]
+
+[sub_resource type="Resource" id=6]
+script = ExtResource( 3 )
+id = 0
+direction = 2
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=7]
+script = ExtResource( 3 )
+id = 1
+direction = 3
+position = Vector2( 1, 0 )
+
+[sub_resource type="RectangleShape2D" id=5]
+extents = Vector2( 32, 32 )
+
+[node name="Gate_Room" type="Node2D"]
+script = ExtResource( 1 )
+room_type = 4
+room_positions = [ Vector2( 0, 0 ), Vector2( 1, 0 ) ]
+exits = [ SubResource( 6 ), SubResource( 7 ) ]
+
+[node name="Room" parent="." instance=ExtResource( 2 )]
+modulate = Color( 0.53, 0.796333, 1, 1 )
+tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 13, 0, 0, 14, 0, 0, 15, 0, 0, 65536, 0, 0, 65551, 0, 0, 131072, 0, 0, 131087, 0, 0, 196615, 0, 0, 196616, 0, 0, 262151, 0, 0, 262152, 0, 0, 327680, 0, 0, 327687, 0, 0, 327688, 0, 0, 327695, 0, 0, 393216, 0, 0, 393223, 0, 0, 393224, 0, 0, 393231, 0, 0, 458752, 0, 0, 458753, 0, 0, 458754, 0, 0, 458755, 0, 0, 458756, 0, 0, 458757, 0, 0, 458758, 0, 0, 458759, 0, 0, 458760, 0, 0, 458761, 0, 0, 458762, 0, 0, 458763, 0, 0, 458764, 0, 0, 458765, 0, 0, 458766, 0, 0, 458767, 0, 0 )
+
+[node name="Left_Exit" type="Area2D" parent="."]
+position = Vector2( -48, 128 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Left_Exit"]
+shape = SubResource( 5 )
+
+[node name="Right_Exit" type="Area2D" parent="."]
+position = Vector2( 560, 128 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Right_Exit"]
+shape = SubResource( 5 )
+[connection signal="body_entered" from="Left_Exit" to="." method="_on_Left_Exit_entered"]
+[connection signal="body_entered" from="Right_Exit" to="." method="_on_Right_Exit_entered"]

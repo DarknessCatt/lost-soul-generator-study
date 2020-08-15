@@ -1,13 +1,15 @@
 extends Node2D
 
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
-enum room_types {START, NORMAL, POWER, BONUS}
+enum room_types {START, NORMAL, POWER, BONUS, GATE}
 
 var room_list : Array = []
 
-var start_rooms : Dictionary = {"list":[], "pointer":0}
+var start_rooms : Array = []
 var normal_rooms : Dictionary = {exit_dir.UP:[], exit_dir.DOWN:[], exit_dir.LEFT:[], exit_dir.RIGHT:[]}
-var power_rooms : Dictionary = {"list":[], "pointer":0}
+var power_rooms : Array = []
+var bonus_rooms : Array = []
+var gate_rooms : Array = []
 
 var room_queue : Dictionary = {"list":[], "pointer":0}
 
@@ -48,10 +50,16 @@ func _ready():
 								normal_rooms[exit_dir.RIGHT].append(room)
 
 			room.room_types.START:
-				start_rooms.list.append(room)
+				start_rooms.append(room)
 
 			room.room_types.POWER:
-				power_rooms.list.append(room)
+				power_rooms.append(room)
+
+			room.room_types.BONUS:
+				bonus_rooms.append(room)
+
+			room.room_types.GATE:
+				gate_rooms.append(room)
 
 	print("Room Direction Distribution:")
 	print("UP: "+str(normal_rooms[exit_dir.UP].size()))
@@ -61,20 +69,27 @@ func _ready():
 
 	room_queue.list = normal_rooms[exit_dir.UP]
 	room_queue.list.shuffle()
-	start_rooms.list.shuffle()
-	power_rooms.list.shuffle()
+	start_rooms.shuffle()
+	power_rooms.shuffle()
+	gate_rooms.shuffle()
 
 func prepare_room_list(type: int, dir : int = exit_dir.UP) -> void:
 	match(type):
 
 		room_types.START:
-			room_queue.list = start_rooms.list
+			room_queue.list = start_rooms
 
 		room_types.NORMAL:
 			room_queue.list = normal_rooms[dir]
 
 		room_types.POWER:
-			room_queue.list = power_rooms.list
+			room_queue.list = power_rooms
+
+		room_types.BONUS:
+			room_queue.list = bonus_rooms
+
+		room_types.GATE:
+			room_queue.list = gate_rooms
 
 	room_queue.list.shuffle()
 	room_queue.pointer = 0
