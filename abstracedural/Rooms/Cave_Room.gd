@@ -6,7 +6,7 @@ func _on_First_Up_body_entered(_body):
 func _on_Second_Up_body_entered(_body):
 	emit_signal("player_exited", 1)
 
-func _on_Left_body_entered(body):
+func _on_Left_body_entered(_body):
 	emit_signal("player_exited", 2)
 
 func _on_Right_body_entered(_body):

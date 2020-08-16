@@ -19,19 +19,19 @@ func _ready():
 			map_data[x].append(null)
 
 	var room_pos = START_POS
-	var start_data : Dictionary
 
 	#Create Start Room
 	$Room_Manager.prepare_room_list(room_types.START)
 
 	var start_room : Dictionary = make_special_room(room_pos, room_types.START)
+	start_room.room["rank"] = 0
 
 	var room_list : Array = [start_room.room]
 
-	room_list += make_path(start_room.exit, 5)
+	room_list += make_path(start_room.exit, 0, 5)
 
-	room_list += make_branch(room_list)
-	room_list += make_branch(room_list, 6, 3, room_types.BONUS)
+	room_list += make_branch(room_list, 1)
+	room_list += make_branch(room_list, 0, 6, 3, room_types.BONUS)
 #	room_list += make_branch(room_list, 7, 6)
 
 	make_cycles(room_list)
@@ -47,7 +47,7 @@ func _ready():
 				map += "[ ]"
 
 			else:
-				map += "[X]"
+				map += "["+str(map_data[y][x].rank)+"]"
 
 		map += "\n"
 
@@ -96,7 +96,8 @@ func make_cycles(room_list : Array) -> void:
 					leads_to.x == (other_room.map_position.x + entrance.position.x) and \
 					leads_to.y == (other_room.map_position.y + entrance.position.y):
 
-						if  (room.node.room_type == room_types.NORMAL or \
+						if  (room.rank == other_room.rank) and \
+							(room.node.room_type == room_types.NORMAL or \
 							other_room.node.room_type == room_types.NORMAL) and \
 							rand_range(0, 1) < 0.5:
 							room.exits.append({"exit": exit, "to": leads_to, "entrance": entrance})
@@ -107,7 +108,7 @@ func make_cycles(room_list : Array) -> void:
 						break
 
 
-func make_branch(room_list : Array, initial_backtrack : int = 4, size : int = 3, final_room_type : int = room_types.POWER):
+func make_branch(room_list : Array, branch_rank : int = 0, initial_backtrack : int = 4, size : int = 3, final_room_type : int = room_types.POWER):
 	var room_list_pointer : int = room_list.size() - (randi()%initial_backtrack+2)
 	var branch_data = {}
 
@@ -129,7 +130,7 @@ func make_branch(room_list : Array, initial_backtrack : int = 4, size : int = 3,
 		room_list_pointer -= 1
 
 	if not branch_data.empty():
-		return make_path(branch_data, size, final_room_type)
+		return make_path(branch_data, branch_rank, size, final_room_type)
 
 	else:
 		return []
@@ -139,7 +140,7 @@ func make_branch(room_list : Array, initial_backtrack : int = 4, size : int = 3,
 #	exit = exit from original room
 #	to = position of the new room
 #	dir = direction it comes from
-func make_path(start_data : Dictionary, path_limit : int = 4, final_room_type : int = room_types.POWER) -> Array:
+func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 4, final_room_type : int = room_types.POWER) -> Array:
 
 	var rooms_list : Array = []
 
@@ -205,6 +206,7 @@ func make_path(start_data : Dictionary, path_limit : int = 4, final_room_type : 
 
 		created_rooms += 1
 		new_room["map_position"] = room_placement_pos
+		new_room["rank"] = path_rank
 		rooms_list.append(new_room)
 		self.place_room(new_room)
 
@@ -219,6 +221,7 @@ func make_path(start_data : Dictionary, path_limit : int = 4, final_room_type : 
 	#Adding Power Room
 	var final_room = make_special_room(room_pos, final_room_type, previous_room)
 
+	final_room.room["rank"] = path_rank
 	rooms_list.append(final_room.room)
 	return rooms_list
 
