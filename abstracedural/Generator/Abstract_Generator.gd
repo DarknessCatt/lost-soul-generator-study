@@ -21,8 +21,6 @@ func _ready():
 	var room_pos = START_POS
 
 	#Create Start Room
-	$Room_Manager.prepare_room_list(room_types.START)
-
 	var start_room : Dictionary = make_special_room(room_pos, room_types.START)
 	start_room.room["rank"] = 0
 
@@ -140,8 +138,7 @@ func make_branch(room_list : Array, branch_rank : int = 0, initial_backtrack : i
 				if not gate_room.empty():
 					branch_room["exits"].append(exit)
 					gate_room.room["rank"] = branch_rank
-					#branch_data = gate_room.exit
-					return[gate_room.room]
+					return [gate_room.room] + make_path(gate_room.exit, branch_rank, size, final_room_type)
 
 		room_list_pointer -= 1
 
@@ -303,11 +300,13 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 					break
 
 				var fits = false
+				var room_placement_pos : Vector2
+				var return_exit : Dictionary
 
 				for entrance in new_room_data.room.node.exits:
 					if entrance.direction == from.exit_dir:
 
-						var room_placement_pos = position - entrance.position
+						room_placement_pos = position - entrance.position
 						fits = true
 
 						for pos in new_room_data.room.node.room_positions:
@@ -320,16 +319,33 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 								break
 
 						if fits:
-							from.exit_data["entrance"] = entrance
-							map_data[from.pos.x][from.pos.y].node.exits.erase(from.exit_data)
-							new_room_data.room["map_position"] = room_placement_pos
-							new_room_data.room["exits"] = [{"exit": entrance, "to": from.pos, "entrance": from.exit_data.exit}]
 							new_room_data.room.node.exits.erase(entrance)
+							return_exit = {"exit": entrance, "to": from.pos, "entrance": from.exit_data.exit}
 							break
 
-				if fits:
-					place_room(new_room_data.room)
-					break
+				if not fits:
+					continue
+
+				var exit_data = choose_exit(new_room_data.room, position)
+
+				if exit_data.empty():
+					continue
+
+				var exit = {"exit":exit_data.exit, "to": exit_data.to}
+
+				from.exit_data["entrance"] = return_exit.exit
+				map_data[from.pos.x][from.pos.y].node.exits.erase(from.exit_data)
+
+				new_room_data.room["map_position"] = room_placement_pos
+				new_room_data.room["exits"] = [return_exit, exit]
+
+				new_room_data.exit["dir"] = exit_data.dir
+				new_room_data.exit["to"] = exit_data.to
+				new_room_data.exit["pos"] = room_placement_pos
+				new_room_data.exit["exit"] = exit
+
+				place_room(new_room_data.room)
+				break
 
 	return new_room_data
 
