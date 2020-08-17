@@ -1,0 +1,92 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://abstracedural/Rooms/Central_Room.gd" type="Script" id=1]
+[ext_resource path="res://Placeholder_White/Placeholder_White.tscn" type="PackedScene" id=2]
+[ext_resource path="res://abstracedural/Exit.gd" type="Script" id=3]
+
+[sub_resource type="Resource" id=1]
+script = ExtResource( 3 )
+id = 0
+direction = 0
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=2]
+script = ExtResource( 3 )
+id = 1
+direction = 1
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=3]
+script = ExtResource( 3 )
+id = 2
+direction = 2
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=4]
+script = ExtResource( 3 )
+id = 3
+direction = 3
+position = Vector2( 0, 0 )
+
+[sub_resource type="RectangleShape2D" id=5]
+extents = Vector2( 32, 32 )
+
+[node name="Test_Gate_Room" type="Node2D"]
+script = ExtResource( 1 )
+room_type = 4
+exits = [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ) ]
+
+[node name="Room" parent="." instance=ExtResource( 2 )]
+modulate = Color( 0.48, 0.861333, 1, 1 )
+tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 65536, 0, 0, 65543, 0, 0, 131072, 0, 0, 131079, 0, 0, 327680, 0, 0, 327687, 0, 0, 393216, 0, 0, 393223, 0, 0, 458752, 0, 0, 458753, 0, 0, 458754, 0, 0, 458757, 0, 0, 458758, 0, 0, 458759, 0, 0 )
+
+[node name="Up_Exit" type="Area2D" parent="."]
+position = Vector2( 128, -48 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Up_Exit"]
+shape = SubResource( 5 )
+
+[node name="Down_Exit" type="Area2D" parent="."]
+position = Vector2( 128, 304 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Down_Exit"]
+shape = SubResource( 5 )
+
+[node name="Left_Exit" type="Area2D" parent="."]
+position = Vector2( -48, 128 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Left_Exit"]
+shape = SubResource( 5 )
+
+[node name="Right_Exit" type="Area2D" parent="."]
+position = Vector2( 304, 128 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Right_Exit"]
+shape = SubResource( 5 )
+
+[node name="Exit_Blocks" type="Node2D" parent="."]
+visible = false
+
+[node name="Up" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 3, 0, 0, 4, 0, 0 )
+
+[node name="Down" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 458755, 0, 0, 458756, 0, 0 )
+
+[node name="Left" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 196608, 0, 0, 262144, 0, 0 )
+
+[node name="Right" parent="Exit_Blocks" instance=ExtResource( 2 )]
+tile_data = PoolIntArray( 196615, 0, 0, 262151, 0, 0 )
+[connection signal="body_entered" from="Up_Exit" to="." method="_on_Up_Exit_entered"]
+[connection signal="body_entered" from="Down_Exit" to="." method="_on_Down_Exit_entered"]
+[connection signal="body_entered" from="Left_Exit" to="." method="_on_Left_Exit_entered"]
+[connection signal="body_entered" from="Right_Exit" to="." method="_on_Right_Exit_entered"]

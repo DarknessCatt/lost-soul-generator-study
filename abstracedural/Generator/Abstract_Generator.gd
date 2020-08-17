@@ -31,8 +31,8 @@ func _ready():
 	room_list += make_path(start_room.exit, 0, 5)
 
 	room_list += make_branch(room_list, 1)
-	room_list += make_branch(room_list, 0, 6, 3, room_types.BONUS)
-#	room_list += make_branch(room_list, 7, 6)
+#	room_list += make_branch(room_list, 0, 6, 3, room_types.BONUS)
+#	room_list += make_branch(room_list, 1, 7, 6, room_types.BONUS)
 
 	make_cycles(room_list)
 
@@ -119,13 +119,29 @@ func make_branch(room_list : Array, branch_rank : int = 0, initial_backtrack : i
 			break
 
 		var branch_room = room_list[room_list_pointer]
+		print("Branch in "+str(room_list_pointer))
 		branch_data = choose_exit(branch_room, branch_room.map_position)
 
 		if not branch_data.empty():
-			branch_room["exits"].append({"exit": branch_data.exit, "to": branch_data.to})
+
+			var exit = {"exit": branch_data.exit, "to": branch_data.to}
+
 			branch_data["pos"] = branch_room.map_position
-			branch_data["exit"] = branch_room["exits"].back()
-			break
+			branch_data["exit"] = exit
+
+			if branch_room.rank >= branch_rank:
+				branch_rank = branch_room.rank
+				branch_room["exits"].append(exit)
+				break
+
+			else:
+				var gate_room : Dictionary = make_special_room(branch_data.to, room_types.GATE, {"pos": branch_data.pos, "exit_data":branch_data.exit, "exit_dir":branch_data.dir})
+
+				if not gate_room.empty():
+					branch_room["exits"].append(exit)
+					gate_room.room["rank"] = branch_rank
+					#branch_data = gate_room.exit
+					return[gate_room.room]
 
 		room_list_pointer -= 1
 
@@ -236,10 +252,17 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 			new_room_data.room["node"] = $Room_Manager.get_room()
 			new_room_data.room.node.exits.shuffle()
 			new_room_data.room["map_position"] = position
-			new_room_data.exit = choose_exit(new_room_data.room, position)
-			new_room_data.room["exits"] = [{"exit":new_room_data.exit.exit, "to": new_room_data.exit.to}]
+
+			var exit_data = choose_exit(new_room_data.room, position)
+			var exit = {"exit":exit_data.exit, "to": exit_data.to}
+
+			new_room_data.room["exits"] = [exit]
+
+			new_room_data.exit["dir"] = exit_data.dir
+			new_room_data.exit["to"] = exit_data.to
 			new_room_data.exit["pos"] = position
-			new_room_data.exit["exit"] = new_room_data.room["exits"][0]
+			new_room_data.exit["exit"] = exit
+
 			place_room(new_room_data.room)
 
 		room_types.POWER, room_types.BONUS:
@@ -271,7 +294,42 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 			place_room(new_room_data.room)
 
 		room_types.GATE:
-			pass
+			while true:
+				new_room_data.room["node"] = $Room_Manager.get_room()
+
+				if new_room_data.room["node"] == null:
+					print("Gate Queue Empty!")
+					new_room_data = {}
+					break
+
+				var fits = false
+
+				for entrance in new_room_data.room.node.exits:
+					if entrance.direction == from.exit_dir:
+
+						var room_placement_pos = position - entrance.position
+						fits = true
+
+						for pos in new_room_data.room.node.room_positions:
+							var map_pos : Vector2 = room_placement_pos + pos
+							if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
+							   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
+							   map_data[map_pos.x][map_pos.y] != null:
+								#print("\tDoesn't fit because of "+str(map_pos))
+								fits = false
+								break
+
+						if fits:
+							from.exit_data["entrance"] = entrance
+							map_data[from.pos.x][from.pos.y].node.exits.erase(from.exit_data)
+							new_room_data.room["map_position"] = room_placement_pos
+							new_room_data.room["exits"] = [{"exit": entrance, "to": from.pos, "entrance": from.exit_data.exit}]
+							new_room_data.room.node.exits.erase(entrance)
+							break
+
+				if fits:
+					place_room(new_room_data.room)
+					break
 
 	return new_room_data
 
