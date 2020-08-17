@@ -28,9 +28,9 @@ func _ready():
 
 	room_list += make_path(start_room.exit, 0, 5)
 
+	room_list += make_branch(room_list, 0, 6, 3, room_types.BONUS)
 	room_list += make_branch(room_list, 1)
-#	room_list += make_branch(room_list, 0, 6, 3, room_types.BONUS)
-#	room_list += make_branch(room_list, 1, 7, 6, room_types.BONUS)
+	room_list += make_branch(room_list, 1, 7, 6, room_types.BONUS)
 
 	make_cycles(room_list)
 
@@ -276,7 +276,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 						if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
 						   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
 						   map_data[map_pos.x][map_pos.y] != null:
-							#print("\tDoesn't fit because of "+str(map_pos))
+							print("\tDoesn't fit because of "+str(map_pos))
 							fits = false
 							break
 
@@ -303,6 +303,8 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 				var room_placement_pos : Vector2
 				var return_exit : Dictionary
 
+				new_room_data.room.node.exits.shuffle()
+
 				for entrance in new_room_data.room.node.exits:
 					if entrance.direction == from.exit_dir:
 
@@ -326,7 +328,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 				if not fits:
 					continue
 
-				var exit_data = choose_exit(new_room_data.room, position)
+				var exit_data = choose_exit(new_room_data.room, room_placement_pos)
 
 				if exit_data.empty():
 					continue
