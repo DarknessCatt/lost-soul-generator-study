@@ -1,33 +1,57 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://abstracedural/Rooms/Gate_Room.gd" type="Script" id=1]
 [ext_resource path="res://Placeholder_White/Placeholder_White.tscn" type="PackedScene" id=2]
 [ext_resource path="res://abstracedural/Exit.gd" type="Script" id=3]
 
-[sub_resource type="Resource" id=6]
+[sub_resource type="Resource" id=1]
 script = ExtResource( 3 )
 id = 0
 direction = 2
 position = Vector2( 0, 0 )
 
-[sub_resource type="Resource" id=7]
+[sub_resource type="Resource" id=2]
 script = ExtResource( 3 )
 id = 1
+direction = 0
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=4]
+script = ExtResource( 3 )
+id = 2
+direction = 1
+position = Vector2( 0, 0 )
+
+[sub_resource type="Resource" id=5]
+script = ExtResource( 3 )
+id = 3
 direction = 3
 position = Vector2( 1, 0 )
 
-[sub_resource type="RectangleShape2D" id=5]
+[sub_resource type="Resource" id=6]
+script = ExtResource( 3 )
+id = 4
+direction = 0
+position = Vector2( 1, 0 )
+
+[sub_resource type="Resource" id=7]
+script = ExtResource( 3 )
+id = 5
+direction = 1
+position = Vector2( 1, 0 )
+
+[sub_resource type="RectangleShape2D" id=3]
 extents = Vector2( 32, 32 )
 
 [node name="Gate_Room" type="Node2D"]
 script = ExtResource( 1 )
 room_type = 4
 room_positions = [ Vector2( 0, 0 ), Vector2( 1, 0 ) ]
-exits = [ SubResource( 6 ), SubResource( 7 ) ]
+exits = [ SubResource( 1 ), SubResource( 2 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ), SubResource( 7 ) ]
 
 [node name="Room" parent="." instance=ExtResource( 2 )]
 modulate = Color( 0.53, 0.796333, 1, 1 )
-tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 11, 0, 0, 12, 0, 0, 13, 0, 0, 14, 0, 0, 15, 0, 0, 65536, 0, 0, 65551, 0, 0, 131072, 0, 0, 131087, 0, 0, 196615, 0, 0, 196616, 0, 0, 262151, 0, 0, 262152, 0, 0, 327680, 0, 0, 327687, 0, 0, 327688, 0, 0, 327695, 0, 0, 393216, 0, 0, 393223, 0, 0, 393224, 0, 0, 393231, 0, 0, 458752, 0, 0, 458753, 0, 0, 458754, 0, 0, 458755, 0, 0, 458756, 0, 0, 458757, 0, 0, 458758, 0, 0, 458759, 0, 0, 458760, 0, 0, 458761, 0, 0, 458762, 0, 0, 458763, 0, 0, 458764, 0, 0, 458765, 0, 0, 458766, 0, 0, 458767, 0, 0 )
+tile_data = PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8, 0, 0, 9, 0, 0, 10, 0, 0, 13, 0, 0, 14, 0, 0, 15, 0, 0, 65536, 0, 0, 65551, 0, 0, 131072, 0, 0, 131087, 0, 0, 196615, 0, 0, 196616, 0, 0, 262151, 0, 0, 262152, 0, 0, 327680, 0, 0, 327687, 0, 0, 327688, 0, 0, 327695, 0, 0, 393216, 0, 0, 393223, 0, 0, 393224, 0, 0, 393231, 0, 0, 458752, 0, 0, 458753, 0, 0, 458754, 0, 0, 458757, 0, 0, 458758, 0, 0, 458759, 0, 0, 458760, 0, 0, 458761, 0, 0, 458762, 0, 0, 458765, 0, 0, 458766, 0, 0, 458767, 0, 0 )
 
 [node name="Left_Exit" type="Area2D" parent="."]
 position = Vector2( -48, 128 )
@@ -35,7 +59,23 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Left_Exit"]
-shape = SubResource( 5 )
+shape = SubResource( 3 )
+
+[node name="Up_Left_Exit" type="Area2D" parent="."]
+position = Vector2( 128, -48 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Up_Left_Exit"]
+shape = SubResource( 3 )
+
+[node name="Down_Left_Exit" type="Area2D" parent="."]
+position = Vector2( 128, 304 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Down_Left_Exit"]
+shape = SubResource( 3 )
 
 [node name="Right_Exit" type="Area2D" parent="."]
 position = Vector2( 560, 128 )
@@ -43,6 +83,53 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Right_Exit"]
-shape = SubResource( 5 )
+shape = SubResource( 3 )
+
+[node name="Up_Right_Exit" type="Area2D" parent="."]
+position = Vector2( 384, -48 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Up_Right_Exit"]
+shape = SubResource( 3 )
+
+[node name="Down_Right_Exit" type="Area2D" parent="."]
+position = Vector2( 384, 304 )
+monitorable = false
+collision_layer = 0
+
+[node name="Area" type="CollisionShape2D" parent="Down_Right_Exit"]
+shape = SubResource( 3 )
+
+[node name="Exit_Blocks" type="Node2D" parent="."]
+visible = false
+
+[node name="0" parent="Exit_Blocks" instance=ExtResource( 2 )]
+modulate = Color( 0.53, 0.796333, 1, 1 )
+tile_data = PoolIntArray( 196608, 0, 0, 262144, 0, 0 )
+
+[node name="1" parent="Exit_Blocks" instance=ExtResource( 2 )]
+modulate = Color( 0.53, 0.796333, 1, 1 )
+tile_data = PoolIntArray( 3, 0, 0, 4, 0, 0 )
+
+[node name="2" parent="Exit_Blocks" instance=ExtResource( 2 )]
+modulate = Color( 0.53, 0.796333, 1, 1 )
+tile_data = PoolIntArray( 458755, 0, 0, 458756, 0, 0 )
+
+[node name="3" parent="Exit_Blocks" instance=ExtResource( 2 )]
+modulate = Color( 0.53, 0.796333, 1, 1 )
+tile_data = PoolIntArray( 196623, 0, 0, 262159, 0, 0 )
+
+[node name="4" parent="Exit_Blocks" instance=ExtResource( 2 )]
+modulate = Color( 0.53, 0.796333, 1, 1 )
+tile_data = PoolIntArray( 11, 0, 0, 12, 0, 0 )
+
+[node name="5" parent="Exit_Blocks" instance=ExtResource( 2 )]
+modulate = Color( 0.53, 0.796333, 1, 1 )
+tile_data = PoolIntArray( 458763, 0, 0, 458764, 0, 0 )
 [connection signal="body_entered" from="Left_Exit" to="." method="_on_Left_Exit_entered"]
+[connection signal="body_entered" from="Up_Left_Exit" to="." method="_on_Up_Left_Exit_body_entered"]
+[connection signal="body_entered" from="Down_Left_Exit" to="." method="_on_Down_Left_Exit_body_entered"]
 [connection signal="body_entered" from="Right_Exit" to="." method="_on_Right_Exit_entered"]
+[connection signal="body_entered" from="Up_Right_Exit" to="." method="_on_Up_Right_Exit_body_entered"]
+[connection signal="body_entered" from="Down_Right_Exit" to="." method="_on_Down_Right_Exit_body_entered"]

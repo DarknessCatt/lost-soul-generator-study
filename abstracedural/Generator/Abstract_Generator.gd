@@ -5,8 +5,8 @@ const ROOM_SIZE : int = 8
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
 enum room_types {START, NORMAL, POWER, BONUS, GATE}
 
-const MAP_SIZE : Vector2 = Vector2(20, 20)
-const START_POS : Vector2 = Vector2(10, 10)
+const MAP_SIZE : Vector2 = Vector2(15, 15)
+const START_POS : Vector2 = Vector2(7, 7)
 
 var map_data : Array
 
@@ -112,12 +112,16 @@ func make_branch(room_list : Array, branch_rank : int = 0, initial_backtrack : i
 
 	while true:
 		if room_list_pointer == 0:
-			print("Room List is Empty in Branch!")
+			#print("Room List is Empty in Branch!")
 			branch_data = {}
 			break
 
 		var branch_room = room_list[room_list_pointer]
-		print("Branch in "+str(room_list_pointer))
+
+		if branch_room.node.room_type == room_types.POWER:
+			room_list_pointer -= 1
+			continue
+
 		branch_data = choose_exit(branch_room, branch_room.map_position)
 
 		if not branch_data.empty():
@@ -295,7 +299,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 				new_room_data.room["node"] = $Room_Manager.get_room()
 
 				if new_room_data.room["node"] == null:
-					print("Gate Queue Empty!")
+					#print("Gate Queue Empty!")
 					new_room_data = {}
 					break
 
@@ -321,7 +325,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 								break
 
 						if fits:
-							new_room_data.room.node.exits.erase(entrance)
+							new_room_data.room.node.erase_exit(entrance)
 							return_exit = {"exit": entrance, "to": from.pos, "entrance": from.exit_data.exit}
 							break
 
