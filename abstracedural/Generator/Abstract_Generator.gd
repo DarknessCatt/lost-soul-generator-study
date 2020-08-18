@@ -398,52 +398,53 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 
 	return new_room_data
 
-#teoricamente não precisaria ser uma função
-func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
-	match(direction):
-
-		exit_dir.UP:
-			if (room_pos.y - 1) < 0 or map_data[room_pos.x][room_pos.y-1] != null:
-				return false
-
-		exit_dir.DOWN:
-			if (room_pos.y + 1) >= MAP_SIZE.y or map_data[room_pos.x][room_pos.y+1] != null:
-				return false
-
-		exit_dir.LEFT:
-			if (room_pos.x - 1) < 0 or map_data[room_pos.x-1][room_pos.y] != null:
-				return false
-
-		exit_dir.RIGHT:
-			if (room_pos.x + 1) >= MAP_SIZE.y or map_data[room_pos.x+1][room_pos.y] != null:
-				return false
-
-	return true
-
 func choose_exit(new_room : Dictionary, room_placement_pos : Vector2) -> Dictionary:
 	var exit_data : Dictionary = {}
 
 	for exit in new_room.node.exits:
 		#print("\tgetting exit from "+str(room_placement_pos+exit.position)+" in direction "+str(exit[1]))
-		if dir_is_valid(room_placement_pos + exit.position, exit.direction):
-			match(exit.direction):
+		var valid : bool = true
+		var dir : int = -1
+		var to : Vector2 = Vector2.ZERO
+		var room_pos = room_placement_pos + exit.position
 
-				exit_dir.UP:
-					exit_data["dir"] = exit_dir.DOWN
-					exit_data["to"] = (room_placement_pos + exit.position + Vector2.UP)
+		match(exit.direction):
 
-				exit_dir.DOWN:
-					exit_data["dir"] = exit_dir.UP
-					exit_data["to"] = (room_placement_pos + exit.position + Vector2.DOWN)
+			exit_dir.UP:
+				if (room_pos.y - 1) < 0 or map_data[room_pos.x][room_pos.y-1] != null:
+					valid = false
+					continue
 
-				exit_dir.LEFT:
-					exit_data["dir"] = exit_dir.RIGHT
-					exit_data["to"] = (room_placement_pos + exit.position + Vector2.LEFT)
+				dir = exit_dir.DOWN
+				to = Vector2.UP
 
-				exit_dir.RIGHT:
-					exit_data["dir"] = exit_dir.LEFT
-					exit_data["to"] = (room_placement_pos + exit.position + Vector2.RIGHT)
+			exit_dir.DOWN:
+				if (room_pos.y + 1) >= MAP_SIZE.y or map_data[room_pos.x][room_pos.y+1] != null:
+					valid = false
+					continue
 
+				dir = exit_dir.UP
+				to = Vector2.DOWN
+
+			exit_dir.LEFT:
+				if (room_pos.x - 1) < 0 or map_data[room_pos.x-1][room_pos.y] != null:
+					valid = false
+					continue
+
+				dir = exit_dir.RIGHT
+				to = Vector2.LEFT
+
+			exit_dir.RIGHT:
+				if (room_pos.x + 1) >= MAP_SIZE.y or map_data[room_pos.x+1][room_pos.y] != null:
+					valid = false
+					continue
+
+				dir = exit_dir.LEFT
+				to = Vector2.RIGHT
+
+		if valid:
+			exit_data["dir"] = dir
+			exit_data["to"] = (room_placement_pos + exit.position + to)
 			exit_data["exit"] = exit
 			break
 
