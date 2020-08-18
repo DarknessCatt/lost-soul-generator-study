@@ -16,38 +16,38 @@ id = 1
 direction = 0
 position = Vector2( 0, 0 )
 
-[sub_resource type="Resource" id=4]
+[sub_resource type="Resource" id=3]
 script = ExtResource( 3 )
 id = 2
 direction = 1
 position = Vector2( 0, 0 )
 
-[sub_resource type="Resource" id=5]
+[sub_resource type="Resource" id=4]
 script = ExtResource( 3 )
 id = 3
 direction = 3
 position = Vector2( 1, 0 )
 
-[sub_resource type="Resource" id=6]
+[sub_resource type="Resource" id=5]
 script = ExtResource( 3 )
 id = 4
 direction = 0
 position = Vector2( 1, 0 )
 
-[sub_resource type="Resource" id=7]
+[sub_resource type="Resource" id=6]
 script = ExtResource( 3 )
 id = 5
 direction = 1
 position = Vector2( 1, 0 )
 
-[sub_resource type="RectangleShape2D" id=3]
+[sub_resource type="RectangleShape2D" id=7]
 extents = Vector2( 32, 32 )
 
 [node name="Gate_Room" type="Node2D"]
 script = ExtResource( 1 )
 room_type = 4
 room_positions = [ Vector2( 0, 0 ), Vector2( 1, 0 ) ]
-exits = [ SubResource( 1 ), SubResource( 2 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ), SubResource( 7 ) ]
+exits = [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ) ]
 
 [node name="Room" parent="." instance=ExtResource( 2 )]
 modulate = Color( 0.53, 0.796333, 1, 1 )
@@ -59,7 +59,7 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Left_Exit"]
-shape = SubResource( 3 )
+shape = SubResource( 7 )
 
 [node name="Up_Left_Exit" type="Area2D" parent="."]
 position = Vector2( 128, -48 )
@@ -67,7 +67,7 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Up_Left_Exit"]
-shape = SubResource( 3 )
+shape = SubResource( 7 )
 
 [node name="Down_Left_Exit" type="Area2D" parent="."]
 position = Vector2( 128, 304 )
@@ -75,7 +75,7 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Down_Left_Exit"]
-shape = SubResource( 3 )
+shape = SubResource( 7 )
 
 [node name="Right_Exit" type="Area2D" parent="."]
 position = Vector2( 560, 128 )
@@ -83,7 +83,7 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Right_Exit"]
-shape = SubResource( 3 )
+shape = SubResource( 7 )
 
 [node name="Up_Right_Exit" type="Area2D" parent="."]
 position = Vector2( 384, -48 )
@@ -91,7 +91,7 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Up_Right_Exit"]
-shape = SubResource( 3 )
+shape = SubResource( 7 )
 
 [node name="Down_Right_Exit" type="Area2D" parent="."]
 position = Vector2( 384, 304 )
@@ -99,7 +99,7 @@ monitorable = false
 collision_layer = 0
 
 [node name="Area" type="CollisionShape2D" parent="Down_Right_Exit"]
-shape = SubResource( 3 )
+shape = SubResource( 7 )
 
 [node name="Exit_Blocks" type="Node2D" parent="."]
 visible = false

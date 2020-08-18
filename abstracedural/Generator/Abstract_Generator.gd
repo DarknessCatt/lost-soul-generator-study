@@ -2,6 +2,8 @@ extends Node2D
 
 const ROOM_SIZE : int = 8
 
+#Seria bom todas essas constantes sendo as mesmas entre todos os arquivos
+#se eu fizer que UP = 1, DOWN = -1, etc, da para mudar o lado só multiplicando
 enum exit_dir {UP, DOWN, LEFT, RIGHT}
 enum room_types {START, NORMAL, POWER, BONUS, GATE}
 
@@ -10,7 +12,10 @@ const START_POS : Vector2 = Vector2(7, 7)
 
 var map_data : Array
 
+#Provavelmente trocar para uma função que não seja a _ready
+#Atualmente gera o mapa
 func _ready():
+	#Mudar para a classe de geração de números da Godot
 	randomize()
 
 	for x in range(MAP_SIZE.x):
@@ -28,12 +33,24 @@ func _ready():
 
 	room_list += make_path(start_room.exit, 0, 5)
 
-	room_list += make_branch(room_list, 0, 6, 3, room_types.BONUS)
-	room_list += make_branch(room_list, 1)
-	room_list += make_branch(room_list, 1, 7, 6, room_types.BONUS)
+	#Alguns caminhos alternativos antes de inserir rank
+	room_list += make_branch(room_list, 0, 3, room_types.BONUS)
+	room_list += make_branch(room_list, 0, 3, room_types.BONUS)
+	room_list += make_branch(room_list, 0, 3, room_types.BONUS)
 
+	#Rank 1 + caminhos
+	room_list += make_branch(room_list, 1)
+	room_list += make_branch(room_list, 1, 3, room_types.BONUS)
+	room_list += make_branch(room_list, 1, 3, room_types.BONUS)
+	room_list += make_branch(room_list, 1, 3, room_types.BONUS)
+
+	#Faz alguns ciclos
 	make_cycles(room_list)
 
+	#Abre as saidas que forem ser usadas
+	for room in room_list: room.node.open_exits(room.exits)
+
+	#Printa o minimapa, bom para debuggar mas da para tirar no futuro.
 	var map : String = ""
 
 	for x in range(MAP_SIZE.x):
@@ -42,24 +59,33 @@ func _ready():
 				map += "[S]"
 
 			elif map_data[y][x] == null:
-				map += "[ ]"
+				map += "   "
 
 			else:
-				map += "["+str(map_data[y][x].rank)+"]"
+				if map_data[y][x].node.room_type == room_types.BONUS:
+					map += "[B]"
+				else:
+					map += "["+str(map_data[y][x].rank)+"]"
 
 		map += "\n"
 
 	print(map)
 
-	for room in room_list: room.node.open_exits(room.exits)
-
+	#Provavelmente mover isso para quem chamar a função para gerar o mapa
 	self.add_child(map_data[cur_pos.x][cur_pos.y].node)
 	map_data[cur_pos.x][cur_pos.y].node.connect("player_exited", self, "_room_exited")
+	#Revisar essa posição inicial
 	$Player.position = Vector2(128, 128)
 
+#Faz os ciclos,
+#Com faz eu digo que ele olha as saidas ainda não usadas
+#e vê se elas batem com as saidas de outros quartos.
+#Pelo menos um dos quartos tem que ser do tipo "Normal".
+#Não cria ciclos entre quartos de ranks diferentes.
 func make_cycles(room_list : Array) -> void:
 
 	for room in room_list:
+
 		for exit in room.node.exits:
 			var leads_to : Vector2 = room.map_position + exit.position
 			var entrance_dir : int
@@ -105,58 +131,70 @@ func make_cycles(room_list : Array) -> void:
 						other_room.node.exits.erase(entrance)
 						break
 
-
-func make_branch(room_list : Array, branch_rank : int = 0, initial_backtrack : int = 4, size : int = 3, final_room_type : int = room_types.POWER):
-	var room_list_pointer : int = room_list.size() - (randi()%initial_backtrack+2)
+#Faz um novo caminho, pegando um quarto aleatorio e tentando partir dele.
+#Repete o processo até conseguir criar um caminho do tamanho ideal ou ter
+#passado por todos os quartos.
+#branch_rank é o rank do caminho, size o tamanho e final_room decide se o ultimo
+#quarto é de poder ou bônus.
+func make_branch(room_list : Array, branch_rank : int = 0, size : int = 3, final_room_type : int = room_types.POWER):
+	var room_list_pointer : int = room_list.size()
 	var branch_data = {}
 
-	while true:
-		if room_list_pointer == 0:
-			#print("Room List is Empty in Branch!")
-			branch_data = {}
-			break
+	room_list.shuffle()
 
-		var branch_room = room_list[room_list_pointer]
-
-		if branch_room.node.room_type == room_types.POWER:
-			room_list_pointer -= 1
-			continue
-
-		branch_data = choose_exit(branch_room, branch_room.map_position)
-
-		if not branch_data.empty():
-
-			var exit = {"exit": branch_data.exit, "to": branch_data.to}
-
-			branch_data["pos"] = branch_room.map_position
-			branch_data["exit"] = exit
-
-			if branch_room.rank >= branch_rank:
-				branch_rank = branch_room.rank
-				branch_room["exits"].append(exit)
-				break
-
-			else:
-				var gate_room : Dictionary = make_special_room(branch_data.to, room_types.GATE, {"pos": branch_data.pos, "exit_data":branch_data.exit, "exit_dir":branch_data.dir})
-
-				if not gate_room.empty():
-					branch_room["exits"].append(exit)
-					gate_room.room["rank"] = branch_rank
-					return [gate_room.room] + make_path(gate_room.exit, branch_rank, size, final_room_type)
+	while room_list_pointer > 0:
 
 		room_list_pointer -= 1
 
-	if not branch_data.empty():
-		return make_path(branch_data, branch_rank, size, final_room_type)
+		var branch = []
+		var branch_room = room_list[room_list_pointer]
 
-	else:
-		return []
+		if branch_room.node.room_type != room_types.POWER and branch_room.node.room_type != room_types.START:
 
-# start_data:
+			branch_data = choose_exit(branch_room, branch_room.map_position)
+
+			if not branch_data.empty():
+
+				var exit = {"exit": branch_data.exit, "to": branch_data.to}
+
+				branch_data["pos"] = branch_room.map_position
+				branch_data["exit"] = exit
+
+				if branch_room.rank >= branch_rank:
+					branch_rank = branch_room.rank
+
+				else:
+					var gate_room : Dictionary = make_special_room(branch_data.to, room_types.GATE, {"pos": branch_data.pos, "exit_data":branch_data.exit, "exit_dir":branch_data.dir})
+
+					if gate_room.empty():
+						continue
+
+					gate_room.room["rank"] = branch_rank
+
+					branch_data = gate_room.exit
+					branch = [gate_room.room]
+
+				branch += make_path(branch_data, branch_rank, size, final_room_type)
+
+				if branch.size() >= size:
+					branch_room["exits"].append(exit)
+					return branch
+				#Else: remove os quartos que estão no branch?
+				#Imagino que ele gere alguns quartos fantasmas assim.
+
+	print("Room List is Empty in Branch!")
+	return []
+
+#Cria um novo caminho, colocando um quarto (que tenha saidas) atrás do outro,
+#partindo de uma saida do quarto anterior.
+# start_data: dicionario com:
 #	pos = position of the original room
-#	exit = exit from original room
+#	exit = exit from original room (Dictionary)
 #	to = position of the new room
 #	dir = direction it comes from
+# path_limit: o tamanho maximo do caminho,
+# 	mas teoricamente ele pode gerar caminhos menores.
+# final_room_type: se o quarto final vai ser de poder ou bônus.
 func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 4, final_room_type : int = room_types.POWER) -> Array:
 
 	var rooms_list : Array = []
@@ -165,18 +203,15 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 	var room_pos : Vector2 = start_data.to
 
 	#Create Normal Rooms
-	var created_rooms : int = 0
-	var exit_data : Dictionary = {}
-
 	$Room_Manager.prepare_room_list(room_types.NORMAL, previous_room.exit_dir)
 
-	while created_rooms < path_limit:
+	while rooms_list.size() < path_limit:
 		#print("Attempting room in "+str(room_pos))
 		var new_room : Dictionary = {}
 		new_room["node"] = $Room_Manager.get_room()
 
 		if new_room.node == null:
-			print("\tRoom List Empty!")
+			#print("\tRoom List Empty!")
 			break
 
 		var fits : bool = false
@@ -188,6 +223,7 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 		for entrance in new_room.node.exits:
 			if entrance.direction == previous_room.exit_dir:
 
+				#Posição "real" do quarto depois que a entrada está alinhada
 				room_placement_pos = room_pos - entrance.position
 				fits = true
 
@@ -208,7 +244,7 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 		if not fits:
 			continue
 
-		exit_data = self.choose_exit(new_room, room_placement_pos)
+		var exit_data = self.choose_exit(new_room, room_placement_pos)
 
 		if exit_data.empty():
 			#print("\tNo Available Exits!")
@@ -216,12 +252,13 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 
 		var next_exit : Dictionary = {"exit": exit_data.exit, "to": exit_data.to}
 
-		new_room["exits"] = [next_exit]
-		new_room["exits"].append(return_exit_info)
+		#Atualiza a saida do quarto anterior
 		previous_room.exit_data["entrance"] = return_exit_info.exit
+		#Talvez dê para remover quando escolhemos? Não é como se ele mudasse.
+		#Teria que adaptar o make_branch e o _ready
 		map_data[previous_room.pos.x][previous_room.pos.y].node.exits.erase(previous_room.exit_data.exit)
 
-		created_rooms += 1
+		new_room["exits"] = [next_exit, return_exit_info]
 		new_room["map_position"] = room_placement_pos
 		new_room["rank"] = path_rank
 		rooms_list.append(new_room)
@@ -237,11 +274,16 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 
 	#Adding Power Room
 	var final_room = make_special_room(room_pos, final_room_type, previous_room)
-
 	final_room.room["rank"] = path_rank
 	rooms_list.append(final_room.room)
+
 	return rooms_list
 
+#Coloca um quarto especial.
+#From: dicionario com
+#	pos: posição do quarto do qual ele vai sair
+#	exit_data: dicionario com as informações da saida do quarto anterior
+#	exit_dir: direção da entrada
 func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -> Dictionary:
 	var new_room_data : Dictionary = {"room":{}, "exit":{}}
 
@@ -269,6 +311,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 		room_types.POWER, room_types.BONUS:
 			new_room_data.room["node"] = $Room_Manager.get_room()
 
+			#Fazer um loop igual o gate para quando tiver mais quartos?
 			for entrance in new_room_data.room.node.exits:
 				if entrance.direction == from.exit_dir:
 
@@ -280,7 +323,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 						if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
 						   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
 						   map_data[map_pos.x][map_pos.y] != null:
-							print("\tDoesn't fit because of "+str(map_pos))
+							#print("\tDoesn't fit because of "+str(map_pos))
 							fits = false
 							break
 
@@ -355,6 +398,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 
 	return new_room_data
 
+#teoricamente não precisaria ser uma função
 func dir_is_valid(room_pos : Vector2, direction : int) -> bool:
 	match(direction):
 
@@ -414,6 +458,7 @@ func place_room(room_data : Dictionary) -> void:
 		map_data[map_pos.x][map_pos.y] = room_data
 		#print("\t\t"+str(map_pos))
 
+# Tudo isso ficaria em um Game Manager
 var changing : bool = false
 var cur_pos : Vector2 = START_POS
 
@@ -442,16 +487,6 @@ func _room_exited(exit_id : int):
 			if exit_data.exit.id == exit_id:
 				change_room(exit_data.to, exit_data.entrance.position)
 				break
-
-func find_exit_id(id : int, exits : Array):
-	var exit_data
-
-	for exit in exits:
-		if exit.id == id:
-			exit_data = exit
-			break
-
-	return exit_data
 
 func _on_can_exit_timeout():
 	changing = false
