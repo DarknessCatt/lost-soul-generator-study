@@ -64,6 +64,10 @@ func _ready():
 			else:
 				if map_data[y][x].node.room_type == room_types.BONUS:
 					map += "[B]"
+
+				elif map_data[y][x].node.room_type == room_types.POWER:
+					map += "[P]"
+
 				else:
 					map += "["+str(map_data[y][x].rank)+"]"
 
@@ -176,11 +180,12 @@ func make_branch(room_list : Array, branch_rank : int = 0, size : int = 3, final
 
 				branch += make_path(branch_data, branch_rank, size, final_room_type)
 
-				if branch.size() >= size:
+				if branch.size() >= size+1:
 					branch_room["exits"].append(exit)
 					return branch
-				#Else: remove os quartos que estão no branch?
-				#Imagino que ele gere alguns quartos fantasmas assim.
+
+				else:
+					while not branch.empty(): remove_room(branch.pop_back())
 
 	print("Room List is Empty in Branch!")
 	return []
@@ -242,6 +247,7 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 					break
 
 		if not fits:
+			new_room.node.call_deferred("free")
 			continue
 
 		var exit_data = self.choose_exit(new_room, room_placement_pos)
@@ -309,33 +315,44 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 			place_room(new_room_data.room)
 
 		room_types.POWER, room_types.BONUS:
-			new_room_data.room["node"] = $Room_Manager.get_room()
+			while true:
+				new_room_data.room["node"] = $Room_Manager.get_room()
 
-			#Fazer um loop igual o gate para quando tiver mais quartos?
-			for entrance in new_room_data.room.node.exits:
-				if entrance.direction == from.exit_dir:
+				if new_room_data.room.node == null:
+					new_room_data = {}
+					break
 
-					var room_placement_pos = position - entrance.position
-					var fits = true
+				var fits = false
 
-					for pos in new_room_data.room.node.room_positions:
-						var map_pos : Vector2 = room_placement_pos + pos
-						if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
-						   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
-						   map_data[map_pos.x][map_pos.y] != null:
-							#print("\tDoesn't fit because of "+str(map_pos))
-							fits = false
+				for entrance in new_room_data.room.node.exits:
+					if entrance.direction == from.exit_dir:
+
+						var room_placement_pos = position - entrance.position
+						fits = true
+
+						for pos in new_room_data.room.node.room_positions:
+							var map_pos : Vector2 = room_placement_pos + pos
+							if map_pos.x < 0 or map_pos.x >= MAP_SIZE.x or \
+							   map_pos.y < 0 or map_pos.y >= MAP_SIZE.y or \
+							   map_data[map_pos.x][map_pos.y] != null:
+								#print("\tDoesn't fit because of "+str(map_pos))
+								fits = false
+								break
+
+						if fits:
+							from.exit_data["entrance"] = entrance
+							map_data[from.pos.x][from.pos.y].node.exits.erase(from.exit_data)
+							new_room_data.room["map_position"] = room_placement_pos
+							new_room_data.room["exits"] = [{"exit": entrance, "to": from.pos, "entrance": from.exit_data.exit}]
+							new_room_data.room.node.exits.erase(entrance)
 							break
 
-					if fits:
-						from.exit_data["entrance"] = entrance
-						map_data[from.pos.x][from.pos.y].node.exits.erase(from.exit_data)
-						new_room_data.room["map_position"] = room_placement_pos
-						new_room_data.room["exits"] = [{"exit": entrance, "to": from.pos, "entrance": from.exit_data.exit}]
-						new_room_data.room.node.exits.erase(entrance)
-						break
+				if not fits:
+					new_room_data.room.node.call_deferred("free")
+					continue
 
-			place_room(new_room_data.room)
+				place_room(new_room_data.room)
+				break
 
 		room_types.GATE:
 			while true:
@@ -373,6 +390,7 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 							break
 
 				if not fits:
+					new_room_data.room.node.call_deferred("free")
 					continue
 
 				var exit_data = choose_exit(new_room_data.room, room_placement_pos)
@@ -458,6 +476,17 @@ func place_room(room_data : Dictionary) -> void:
 		var map_pos : Vector2 = room_placement_pos + pos
 		map_data[map_pos.x][map_pos.y] = room_data
 		#print("\t\t"+str(map_pos))
+
+func remove_room(room_data : Dictionary) -> void:
+	var old_room = room_data.node
+	var room_placement_pos = room_data.map_position
+	#print("\tmarking rooms in map_data")
+	for pos in old_room.room_positions:
+		var map_pos : Vector2 = room_placement_pos + pos
+		map_data[map_pos.x][map_pos.y] = null
+		#print("\t\t"+str(map_pos))
+
+	old_room.call_deferred("free")
 
 # Tudo isso ficaria em um Game Manager
 var changing : bool = false

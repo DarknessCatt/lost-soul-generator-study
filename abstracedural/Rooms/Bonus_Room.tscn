@@ -4,25 +4,25 @@
 [ext_resource path="res://Placeholder_White/Placeholder_White.tscn" type="PackedScene" id=2]
 [ext_resource path="res://abstracedural/Exit.gd" type="Script" id=3]
 
-[sub_resource type="Resource" id=6]
+[sub_resource type="Resource" id=1]
 script = ExtResource( 3 )
 id = 0
 direction = 0
 position = Vector2( 0, 0 )
 
-[sub_resource type="Resource" id=7]
+[sub_resource type="Resource" id=2]
 script = ExtResource( 3 )
 id = 1
 direction = 1
 position = Vector2( 0, 0 )
 
-[sub_resource type="Resource" id=8]
+[sub_resource type="Resource" id=3]
 script = ExtResource( 3 )
 id = 2
 direction = 2
 position = Vector2( 0, 0 )
 
-[sub_resource type="Resource" id=9]
+[sub_resource type="Resource" id=4]
 script = ExtResource( 3 )
 id = 3
 direction = 3
@@ -34,7 +34,7 @@ extents = Vector2( 32, 32 )
 [node name="Bonus_Room" type="Node2D"]
 script = ExtResource( 1 )
 room_type = 3
-exits = [ SubResource( 6 ), SubResource( 7 ), SubResource( 8 ), SubResource( 9 ) ]
+exits = [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ) ]
 
 [node name="Room" parent="." instance=ExtResource( 2 )]
 modulate = Color( 1, 0.639216, 0.458824, 1 )

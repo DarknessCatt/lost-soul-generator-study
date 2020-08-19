@@ -9,6 +9,7 @@ export(room_types) var room_type : int = room_types.NORMAL
 export(Array, Vector2) var room_positions : Array = [Vector2(0,0)]
 export(Array, Resource) var exits : Array = []
 
+# warning-ignore:unused_signal
 signal player_exited(exit)
 
 func _ready():
