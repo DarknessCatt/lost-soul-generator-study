@@ -31,9 +31,8 @@ func _ready():
 
 	var room_list : Array = [start_room.room]
 
-	room_list += make_path(start_room.exit, 0, 5)
-
-	#Alguns caminhos alternativos antes de inserir rank
+	#Rank 0 + caminhos
+	room_list += make_branch(room_list, 0, 5)
 	room_list += make_branch(room_list, 0, 3, room_types.BONUS)
 	room_list += make_branch(room_list, 0, 3, room_types.BONUS)
 	room_list += make_branch(room_list, 0, 3, room_types.BONUS)
@@ -153,7 +152,7 @@ func make_branch(room_list : Array, branch_rank : int = 0, size : int = 3, final
 		var branch = []
 		var branch_room = room_list[room_list_pointer]
 
-		if branch_room.node.room_type != room_types.POWER and branch_room.node.room_type != room_types.START:
+		if branch_room.node.room_type != room_types.POWER:
 
 			branch_data = choose_exit(branch_room, branch_room.map_position)
 
@@ -198,7 +197,7 @@ func make_branch(room_list : Array, branch_rank : int = 0, size : int = 3, final
 #	to = position of the new room
 #	dir = direction it comes from
 # path_limit: o tamanho maximo do caminho,
-# 	mas teoricamente ele pode gerar caminhos menores.
+# 	mas teoricamente ele pode gerar caminhos menores, mas é bloqueado pelo make_branch.
 # final_room_type: se o quarto final vai ser de poder ou bônus.
 func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 4, final_room_type : int = room_types.POWER) -> Array:
 
@@ -260,16 +259,16 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 
 		#Atualiza a saida do quarto anterior
 		previous_room.exit_data["entrance"] = return_exit_info.exit
-		#Talvez dê para remover quando escolhemos? Não é como se ele mudasse.
-		#Teria que adaptar o make_branch e o _ready
 		map_data[previous_room.pos.x][previous_room.pos.y].node.exits.erase(previous_room.exit_data.exit)
 
+		#Atualiza dados do novo quarto
 		new_room["exits"] = [next_exit, return_exit_info]
 		new_room["map_position"] = room_placement_pos
 		new_room["rank"] = path_rank
 		rooms_list.append(new_room)
 		self.place_room(new_room)
 
+		#Prepara a data para a próxima iteração
 		previous_room.exit_data = next_exit
 		previous_room.exit_dir = exit_data.dir
 		previous_room.pos = room_pos
@@ -278,7 +277,7 @@ func make_path(start_data : Dictionary, path_rank : int = 0, path_limit : int = 
 
 		$Room_Manager.prepare_room_list(room_types.NORMAL, previous_room.exit_dir)
 
-	#Adding Power Room
+	#Adding Final Room
 	var final_room = make_special_room(room_pos, final_room_type, previous_room)
 	final_room.room["rank"] = path_rank
 	rooms_list.append(final_room.room)
@@ -299,18 +298,8 @@ func make_special_room(position : Vector2, type : int, from : Dictionary = {}) -
 
 		room_types.START:
 			new_room_data.room["node"] = $Room_Manager.get_room()
-			new_room_data.room.node.exits.shuffle()
 			new_room_data.room["map_position"] = position
-
-			var exit_data = choose_exit(new_room_data.room, position)
-			var exit = {"exit":exit_data.exit, "to": exit_data.to}
-
-			new_room_data.room["exits"] = [exit]
-
-			new_room_data.exit["dir"] = exit_data.dir
-			new_room_data.exit["to"] = exit_data.to
-			new_room_data.exit["pos"] = position
-			new_room_data.exit["exit"] = exit
+			new_room_data.room["exits"] = []
 
 			place_room(new_room_data.room)
 
