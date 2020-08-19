@@ -16,6 +16,8 @@ var room_queue : Dictionary = {"list":[], "pointer":0}
 func _ready():
 	var path = "res://abstracedural/Rooms/"
 	var dir = Directory.new()
+
+	#Pega todos os arquivos .tscn no caminho
 	if dir.open(path) == OK:
 		dir.list_dir_begin(true, true)
 		var file_name = dir.get_next()
@@ -26,6 +28,7 @@ func _ready():
 	else:
 		print("An error occurred when trying to access the rooms folder.")
 
+	#Organiza os quartos
 	for room in room_list:
 		match(room.room_type):
 
@@ -61,17 +64,11 @@ func _ready():
 			room.room_types.GATE:
 				gate_rooms.append(room)
 
-	print("Room Direction Distribution:")
-	print("UP: "+str(normal_rooms[exit_dir.UP].size()))
-	print("DOWN: "+str(normal_rooms[exit_dir.DOWN].size()))
-	print("LEFT: "+str(normal_rooms[exit_dir.LEFT].size()))
-	print("RIGHT: "+str(normal_rooms[exit_dir.RIGHT].size()))
-
-	room_queue.list = normal_rooms[exit_dir.UP]
-	room_queue.list.shuffle()
-	start_rooms.shuffle()
-	power_rooms.shuffle()
-	gate_rooms.shuffle()
+#	print("Room Direction Distribution:")
+#	print("UP: "+str(normal_rooms[exit_dir.UP].size()))
+#	print("DOWN: "+str(normal_rooms[exit_dir.DOWN].size()))
+#	print("LEFT: "+str(normal_rooms[exit_dir.LEFT].size()))
+#	print("RIGHT: "+str(normal_rooms[exit_dir.RIGHT].size()))
 
 func prepare_room_list(type: int, dir : int = exit_dir.UP) -> void:
 	match(type):
